@@ -1,8 +1,9 @@
 = cryptonight
 Equim <https://github.com/Equim-chan[@Equim-chan]>
 
-image:https://img.shields.io/travis/Equim-chan/cryptonight.svg[Travis, link=https://travis-ci.org/Equim-chan/cryptonight]
 image:http://img.shields.io/badge/godoc-reference-5272B4.svg[GoDoc, link=https://godoc.org/ekyu.moe/cryptonight]
+image:https://img.shields.io/circleci/project/github/Equim-chan/cryptonight.svg[CircleCI, link=https://circleci.com/gh/Equim-chan/cryptonight]
+image:https://img.shields.io/codecov/c/github/codecov/example-python.svg[Codecov, link=https://codecov.io/github/Equim-chan/cryptonight]
 image:https://goreportcard.com/badge/github.com/Equim-chan/cryptonight[Go Report Card, link=https://goreportcard.com/report/github.com/Equim-chan/cryptonight]
 image:https://img.shields.io/github/license/Equim-chan/cryptonight.svg[License, link=https://github.com/Equim-chan/cryptonight/blob/master/LICENSE]
 

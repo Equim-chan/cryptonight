@@ -17,7 +17,7 @@ jobs:
           name: govet
           command: go vet ./...
       - run:
-          name: test and coverage
+          name: Test and coverage
           command: |
             go test -v -race -coverprofile=coverage.txt -covermode=atomic &&
             bash <(curl -s https://codecov.io/bash)
