@@ -2,9 +2,8 @@
 // +
 
 // Package cryptonight implements CryptoNight hash function and some of its
-// variant.
-//
-// ref: https://cryptonote.org/cns/cns008.txt
+// variant. Original CryptoNight algorithm is defined in CNS008 at
+// https://cryptonote.org/cns/cns008.txt
 package cryptonight // import "ekyu.moe/cryptonight"
 
 import (
@@ -98,7 +97,7 @@ type Cache struct {
 // This is assumed and not checked by Sum. If this condition doesn't meet, Sum
 // will panic straightforward.
 func (cache *Cache) Sum(data []byte, variant int) []byte {
-	// as per cns008 sec.3 Scratchpad Initialization
+	// as per CNS008 sec.3 Scratchpad Initialization
 	sha3.Keccak1600State(&cache.finalState, data)
 
 	tweak := uint64(0)
@@ -120,7 +119,7 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 		copy(cache.scratchpad[i:], blocks)
 	}
 
-	// as per cns008 sec.4 Memory-Hard Loop
+	// as per CNS008 sec.4 Memory-Hard Loop
 	a, b := new([2]uint64), new([2]uint64)
 	c, d := new([2]uint64), new([2]uint64)
 	product := new([2]uint64) // product in byteMul step
@@ -163,7 +162,7 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 		}
 	}
 
-	// as per cns008 sec.5 Result Calculation
+	// as per CNS008 sec.5 Result Calculation
 	key = cache.finalState[4:8]
 	aes.CnExpandKey(key, rkeys)
 	blocks = cache.finalState[8:24]
