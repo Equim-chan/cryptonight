@@ -47,9 +47,21 @@ func ExampleSum() {
 == Development
 While this repository is already out-of-box, which means what you need to do to use it in your code is just a `go get` (or `dep ensure -add` whatsoever), in case you want to hack on this library, some additional steps are required since it uses code generation.
 
+=== Proprocess
 If you modified a source file in this library that uses C-kind macros (the comments tells), in order to expand them and generate the final code, https://linux.die.net/man/1/cpp[cpp(1)] is needed, which a part of GCC toolchain and should be already available if you have installed gcc (or MinGW for Windows) in your machine.
 
 Once some modification is made in a file that used macro, simply use `go generate ekyu.moe/cryptonight/\...` to run the gcc preprocessor on them.
+
+=== Packages information
+``ekyu.moe/cryptonight/internal/aes``:: From Go's crypto/aes. Since CryptoNight's use of AES is quite non-standard and not intended for encryption, you must use this package this package with care for project that's not CryptoNight associated.
+
+``ekyu.moe/cryptonight/internal/aes/cpu``:: From Go's internal/cpu. This is a dependancy for aes package which is used to detect if the CPU supports AES-NI.
+
+``ekyu.moe/cryptonight/internal/sha3``:: From Go's golang.org/x/crypto/sha3. All CryptoNight specific additional works are made in `cn.go` only; other files are untouched at all.
+
+``ekyu.moe/cryptonight/groestl``:: Grøstl-256 implementation. It is directly ported from C and not quite optimized.
+
+``ekyu.moe/cryptonight/jh``:: JH-256 implementation. It is directly ported from C and not quite optimized.
 
 == License
 https://github.com/Equim-chan/cryptonight/blob/master/LICENSE[MIT]

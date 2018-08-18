@@ -1,3 +1,10 @@
+// Package aes implements AES utilities for CryptoNight usage.
+//
+// Most files are ported from Go's crypto/aes package.
+//
+// Since CryptoNight's use of AES is quite non-standard and not intended
+// for encryption, you must use this package this package with care for
+// project that's not CryptoNight associated.
 package aes // import "ekyu.moe/cryptonight/internal/aes"
 
 // CnExpandKey expands exactly 10 round keys.
