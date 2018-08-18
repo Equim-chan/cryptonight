@@ -1,7 +1,7 @@
 // HEAD_PLACEHOLDER
 // +build ignore
 
-// Package groestl implements Groestl-256 algorithm.
+// Package groestl implements Grøstl-256 algorithm.
 //
 // This Go implementation is a port of the original C implementation which is
 // included in Monero as follows:
