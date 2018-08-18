@@ -6,13 +6,13 @@ image:http://img.shields.io/badge/godoc-reference-5272B4.svg[GoDoc, link=https:/
 image:https://goreportcard.com/badge/github.com/Equim-chan/cryptonight[Go Report Card, link=https://goreportcard.com/report/github.com/Equim-chan/cryptonight]
 image:https://img.shields.io/github/license/Equim-chan/cryptonight.svg[License, link=https://github.com/Equim-chan/cryptonight/blob/master/LICENSE]
 
-Pure Go/ASM implementation of CryptoNight hash function and some of its variant, without any CGO bindings.
+Pure Go/ASM implementation of CryptoNight hash function and some of its variant, without any CGO binding.
 
 == Features
 * Support for Monero v7 variant. https://github.com/monero-project/monero/pull/4218/[Variant 2] is underway.
 * No CGO hell, making builds easier and faster.
 * Hardware acceleration available for amd64 architecture.
-* Basic support for https://godoc.org/ekyu.moe/cryptonight#Cache[cache], since it is memory hard.
+* Basic https://godoc.org/ekyu.moe/cryptonight#Cache[cache] support, since it is memory hard.
 
 == Install
 [source,shell]
@@ -45,7 +45,7 @@ func ExampleSum() {
 ----
 
 == Development
-Note that this repository is already out-of-box, you only need a `go get` (or `dep ensure -add` whatsoever) to use it in your code and that's all, but in case you want to hack on this library, some additional steps are required since it uses code generation.
+While this repository is already out-of-box, which means what you need to do to use it in your code is just a `go get` (or `dep ensure -add` whatsoever), in case you want to hack on this library, some additional steps are required since it uses code generation.
 
 If you modified a source file in this library that uses C-kind macros (the comments tells), in order to expand them and generate the final code, https://linux.die.net/man/1/cpp[cpp(1)] is needed, which a part of GCC toolchain and should be already available if you have installed gcc (or MinGW for Windows) in your machine.
 

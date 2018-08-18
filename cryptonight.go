@@ -51,7 +51,7 @@ var _ = unsafe.Pointer(nil)
 // manage multiple Cache instances (recommended for mining pools).
 //
 //
-// Example for multiple instances (mining app):
+// Example for multiple instances (for mining app):
 //      n := runtime.GOMAXPROCS()
 //      c := make([]*cryptonight.Cached, n)
 //      for i := 0; i < n; i++ {
@@ -70,7 +70,7 @@ var _ = unsafe.Pointer(nil)
 //      // ...
 //
 //
-// Example for sync.Pool (mining pool):
+// Example for sync.Pool (for mining pool):
 //      cachePool := sync.Pool{
 //          New: func() interface{} {
 //              return new(cryptonight.Cache)
@@ -78,15 +78,19 @@ var _ = unsafe.Pointer(nil)
 //      }
 //
 //      // ...
-//      data := <-share // received from some miner
-//      if len(data) < 43 { // input for variant 1 must be longer than 43 bytes
-//      	// ...
+//      blob := <-share // received from some miner
+//      if len(blob) < 43 { // input for variant 1 must be longer than 43 bytes.
+//      	// reject share...
 //      	return
 //      }
 //      cache := cachePool.Get().(*cryptonight.Cache)
-//      sum := cache.Sum(data, 1)
-//      cachePool.Put(cache) // a Cache is not used after Sum.
-//      // do something with sum...
+//      sum := cache.Sum(blob, 1)
+//      // cache is not used after calling Sum, should be returned to the memory
+//      // pool as soon as possible, and it's better not to use a defer here.
+//      cachePool.Put(cache)
+//      // calculate difficulty.
+//      diff := cryptonight.Difficulty(sum)
+//      // accept share...
 //
 // The zero value for Cache is ready to use.
 type Cache struct {
@@ -97,9 +101,9 @@ type Cache struct {
 // Sum calculate a CryptoNight hash digest. The return value is exactly 32 bytes
 // long.
 //
-// Note that if variant is 1, then data is required to have at least 43 bytes.
-// This is assumed and not checked by Sum. If such condition doesn't meet, Sum
-// will panic.
+// When variant is 1, data is required to have at least 43 bytes.
+// This is assumed and not checked by Sum. If this condition doesn't meet, Sum
+// will panic straightforward.
 func (cache *Cache) Sum(data []byte, variant int) []byte {
 	// as per cns008 sec.3 Scratchpad Initialization
 	sha3.Keccak1600State(&cache.finalState, data)
@@ -205,12 +209,12 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 // Sum calculate a CryptoNight hash digest. The return value is exactly 32 bytes
 // long.
 //
-// Note that if variant is 1, then data is required to have at least 43 bytes.
-// This is assumed and not checked by Sum. If such condition doesn't meet, Sum
-// will panic.
+// When variant is 1, data is required to have at least 43 bytes.
+// This is assumed and not checked by Sum. If this condition doesn't meet, Sum
+// will panic straightforward.
 //
-// Sum is not recommended for a large scale of calls as it consumes a large
-// amount of memory. In such scenario, consider using Cache instead.
+// Sum is not recommended for a large scale of calls since CryptoNight itself is
+// a memory hard algorithm. In such scenario, consider using Cache instead.
 func Sum(data []byte, variant int) []byte {
 	return new(Cache).Sum(data, variant)
 }
