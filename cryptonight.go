@@ -8,6 +8,7 @@
 package cryptonight // import "ekyu.moe/cryptonight"
 
 import (
+	"encoding/binary"
 	"hash"
 	"runtime"
 	"unsafe"
@@ -30,20 +31,19 @@ const _ = `
 #undef ignore
 
 #define U64_U8(a, begin, end) \
-	((*[((end) - (begin)) * 8]uint8)(unsafe.Pointer(&a[begin])))
+    ( (*[( (end) - (begin) ) * 8]uint8)(unsafe.Pointer(&a[ (begin) ])) )
 
-#define U8_U32(a, begin, end) \
-	((*[((end) - (begin)) / 4]uint32)(unsafe.Pointer(&a[begin])))
+#define U64_U32(a, begin, end) \
+    ( (*[( (end) - (begin) ) * 2]uint32)(unsafe.Pointer(&a[ (begin) ])) )
 
-#define TO_ADDR(a) \
-	((uint32(a[2])<<16 | uint32(a[1])<<8 | uint32(a[0])) & 0x1ffff0)
+#define TO_ADDR(a) (( (a[0]) & 0x1ffff0) >> 3)
 `
 
 // To trick goimports(1).
 var _ = unsafe.Pointer(nil)
 
 // Cache can reuse the memory chunks for potential multiple Sum calls. A Cache
-// instance occupies 2,097,352 bytes in memory.
+// instance occupies at least 2,097,352 bytes in memory.
 //
 // cache.Sum is not concurrent safe. A Cache only allows at most one Sum running.
 // If you intend to call cache.Sum it concurrently, you should either create
@@ -52,42 +52,46 @@ var _ = unsafe.Pointer(nil)
 //
 //
 // Example for multiple instances (mining app):
-//		n := runtime.GOMAXPROCS()
-//		c := make([]*cryptonight.Cached, n)
-//		for i := 0; i < n; i++ {
-//			c[i] = new(cryptonight.Cached)
-//		}
+//      n := runtime.GOMAXPROCS()
+//      c := make([]*cryptonight.Cached, n)
+//      for i := 0; i < n; i++ {
+//          c[i] = new(cryptonight.Cached)
+//      }
 //
-//		// ...
-//		for _, v := range c {
-//			go func() {
-//				for {
-//					sum := v.Sum(data, 1)
-//					// do something with sum...
-//				}
-//			}()
-//		}
-//		// ...
+//      // ...
+//      for _, v := range c {
+//          go func() {
+//              for {
+//                  sum := v.Sum(data, 1)
+//                  // do something with sum...
+//              }
+//          }()
+//      }
+//      // ...
 //
 //
 // Example for sync.Pool (mining pool):
-//		cachePool := sync.Pool{
-//			New: func() interface{} {
-//				return new(cryptonight.Cache)
-//			},
-//		}
+//      cachePool := sync.Pool{
+//          New: func() interface{} {
+//              return new(cryptonight.Cache)
+//          },
+//      }
 //
-//		// ...
-//		data := <-share // received from some miner
-//		cache := cachePool.Get().(*cryptonight.Cache)
-//		sum := cache.Sum(data, 1)
-//		cachePool.Put(cache) // a Cache is not used after Sum.
-//		// do something with sum...
+//      // ...
+//      data := <-share // received from some miner
+//      if len(data) < 43 { // input for variant 1 must be longer than 43 bytes
+//      	// ...
+//      	return
+//      }
+//      cache := cachePool.Get().(*cryptonight.Cache)
+//      sum := cache.Sum(data, 1)
+//      cachePool.Put(cache) // a Cache is not used after Sum.
+//      // do something with sum...
 //
 // The zero value for Cache is ready to use.
 type Cache struct {
-	finalState [200]byte
-	scratchpad [2 * 1024 * 1024]byte
+	finalState [25]uint64                  // state of keccak1600
+	scratchpad [2 * 1024 * 1024 / 8]uint64 // 2 MiB scratchpad for memhard loop
 }
 
 // Sum calculate a CryptoNight hash digest. The return value is exactly 32 bytes
@@ -100,81 +104,83 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 	// as per cns008 sec.3 Scratchpad Initialization
 	sha3.Keccak1600State(&cache.finalState, data)
 
-	tweak := make([]byte, 8)
+	tweak := uint64(0)
 	if variant == 1 {
-		// therefore data must be larger than 43 bytes
-		xorWords(tweak, cache.finalState[192:], data[35:43])
+		// that's why data must have more than 43 bytes
+		tweak = cache.finalState[24] ^ binary.LittleEndian.Uint64(data[35:43])
 	}
 
-	aesKey := cache.finalState[:32]
-	rkeys := make([]uint32, 10*4) // 10 rounds, instead of 14 as in standard AES-256
-	aes.CnExpandKey(aesKey, rkeys)
-	blocks := make([]byte, 128)
-	copy(blocks, cache.finalState[64:192])
+	key := cache.finalState[:4]
+	rkeys := new([40]uint32) // 10 rounds, instead of 14 as in standard AES-256
+	aes.CnExpandKey(key, rkeys)
+	blocks := make([]uint64, 16)
+	copy(blocks, cache.finalState[8:24])
 
-	for j := 0; j < 2*1024*1024; j += 128 {
-		for i := 0; i < 128; i += 16 {
-			aes.CnRounds(blocks[i:], blocks[i:], rkeys)
+	for i := 0; i < 2*1024*1024/8; i += 16 {
+		for j := 0; j < 16; j += 2 {
+			aes.CnRounds(blocks[j:], blocks[j:], rkeys)
 		}
-		copy(cache.scratchpad[j:], blocks)
+		copy(cache.scratchpad[i:], blocks)
 	}
 
 	// as per cns008 sec.4 Memory-Hard Loop
-	a64, b64 := new([2]uint64), new([2]uint64)
-	c64, d64 := new([2]uint64), new([2]uint64)
-	a8, b8 := U64_U8(a64, 0, 2), U64_U8(b64, 0, 2) // same pointer, but different layout
-	c8, d8 := U64_U8(c64, 0, 2), U64_U8(d64, 0, 2)
-	product := new([2]uint64)
-	rk := new([4]uint32)
-	var addr uint32
+	a, b := new([2]uint64), new([2]uint64)
+	c, d := new([2]uint64), new([2]uint64)
+	product := new([2]uint64) // product in byteMul step
+	addr := uint64(0)         // address index
+	t := uint64(0)            // for variant 1
 
-	xorWords(a8[:], cache.finalState[:16], cache.finalState[32:48])
-	xorWords(b8[:], cache.finalState[16:32], cache.finalState[48:64])
+	a[0] = cache.finalState[0] ^ cache.finalState[4]
+	a[1] = cache.finalState[1] ^ cache.finalState[5]
+	b[0] = cache.finalState[2] ^ cache.finalState[6]
+	b[1] = cache.finalState[3] ^ cache.finalState[7]
 
 	for i := 0; i < 524288; i++ {
-		addr = TO_ADDR(a8)
-		rk = U8_U32(a8, 0, 16)
-		aes.CnSingleRound(c8[:], cache.scratchpad[addr:], rk[:])
-		xorWords(cache.scratchpad[addr:], b8[:], c8[:])
-		copy(b64[:], c64[:])
+		addr = TO_ADDR(a)
+		aes.CnSingleRound(c[:], cache.scratchpad[addr:], U64_U32(a, 0, 2))
+		cache.scratchpad[addr] = b[0] ^ c[0]
+		cache.scratchpad[addr+1] = b[1] ^ c[1]
+		b[0], b[1] = c[0], c[1]
 
 		if variant == 1 {
-			t := cache.scratchpad[addr+11]
+			t = cache.scratchpad[addr+1] >> 24
 			t = ((^t)&1)<<4 | (((^t)&1)<<4&t)<<1 | (t&32)>>1
-			cache.scratchpad[addr+11] ^= t
+			cache.scratchpad[addr+1] ^= t << 24
 		}
 
-		addr = TO_ADDR(c8)
-		copy(d8[:], cache.scratchpad[addr:])
-		byteMul(product, c64[0], d64[0])
+		addr = TO_ADDR(c)
+		d[0] = cache.scratchpad[addr]
+		d[1] = cache.scratchpad[addr+1]
+		byteMul(product, c[0], d[0])
 		// byteAdd
-		a64[0] += product[0]
-		a64[1] += product[1]
+		a[0] += product[0]
+		a[1] += product[1]
 
-		copy(cache.scratchpad[addr:], a8[:])
-		xorWords(a8[:], a8[:], d8[:])
+		cache.scratchpad[addr] = a[0]
+		cache.scratchpad[addr+1] = a[1]
+		a[0] ^= d[0]
+		a[1] ^= d[1]
 
 		if variant == 1 {
-			for i := uint32(0); i < 8; i++ {
-				cache.scratchpad[addr+i+8] ^= tweak[i]
-			}
+			cache.scratchpad[addr+1] ^= tweak
 		}
 	}
 
 	// as per cns008 sec.5 Result Calculation
-	aesKey = cache.finalState[32:64]
-	aes.CnExpandKey(aesKey, rkeys)
-	blocks = cache.finalState[64:192]
+	key = cache.finalState[4:8]
+	aes.CnExpandKey(key, rkeys)
+	blocks = cache.finalState[8:24]
 
-	for j := 0; j < 2*1024*1024; j += 128 {
-		xorWords(cache.scratchpad[j:j+128], cache.scratchpad[j:j+128], blocks)
-		for i := 0; i < 128; i += 16 {
-			aes.CnRounds(cache.scratchpad[j+i:j+i+16], cache.scratchpad[j+i:j+i+16], rkeys)
+	for i := 0; i < 2*1024*1024/8; i += 16 {
+		for j := 0; j < 16; j += 2 {
+			cache.scratchpad[i+j] ^= blocks[j]
+			cache.scratchpad[i+j+1] ^= blocks[j+1]
+			aes.CnRounds(cache.scratchpad[i+j:], cache.scratchpad[i+j:], rkeys)
 		}
-		blocks = cache.scratchpad[j : j+128]
+		blocks = cache.scratchpad[i : i+16]
 	}
 
-	copy(cache.finalState[64:192], blocks)
+	copy(cache.finalState[8:24], blocks)
 
 	// This KeepAlive is a must, as we hacked too much for memory.
 	runtime.KeepAlive(cache.finalState)
@@ -191,7 +197,7 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 	default:
 		h = skein.New256(nil)
 	}
-	h.Write(cache.finalState[:])
+	h.Write(U64_U8(cache.finalState, 0, 25)[:])
 
 	return h.Sum(nil)
 }

@@ -2,15 +2,15 @@
 
 package aes
 
-func cnExpandKey(key []byte, rkeys []uint32) {
+func cnExpandKey(key []uint64, rkeys *[40]uint32) {
 	if !supportsAES {
-		expandKeyGo(key, rkeys, nil)
+		cnExpandKeyGo(key, rkeys)
 	} else {
 		cnExpandKeyAsm(&key[0], &rkeys[0])
 	}
 }
 
-func cnRounds(dst, src []byte, rkeys []uint32) {
+func cnRounds(dst, src []uint64, rkeys *[40]uint32) {
 	if !supportsAES {
 		cnRoundsGo(dst, src, rkeys)
 	} else {
@@ -18,7 +18,7 @@ func cnRounds(dst, src []byte, rkeys []uint32) {
 	}
 }
 
-func cnSingleRound(dst, src []byte, rkey []uint32) {
+func cnSingleRound(dst, src []uint64, rkey *[4]uint32) {
 	if !supportsAES {
 		cnSingleRoundGo(dst, src, rkey)
 	} else {
@@ -27,10 +27,10 @@ func cnSingleRound(dst, src []byte, rkey []uint32) {
 }
 
 //go:noescape
-func cnRoundsAsm(dst, src *byte, rkeys *uint32)
+func cnRoundsAsm(dst, src *uint64, rkeys *uint32)
 
 //go:noescape
-func cnSingleRoundAsm(dst, src *byte, rkey *uint32)
+func cnSingleRoundAsm(dst, src *uint64, rkey *uint32)
 
 //go:noescape
-func cnExpandKeyAsm(src *byte, rkey *uint32)
+func cnExpandKeyAsm(src *uint64, rkey *uint32)

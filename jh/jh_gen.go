@@ -9,7 +9,7 @@
 //     src/crypto/jh.h
 //
 // Most comments in the original file is copied as well.
-package jh
+package jh // import "ekyu.moe/cryptonight/jh"
 
 import (
 	"encoding/binary"

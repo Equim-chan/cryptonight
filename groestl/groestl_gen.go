@@ -12,7 +12,7 @@
 // Most comments in the original file is copied as well.
 //
 // In this implementation, we assume all bytes are full.
-package groestl
+package groestl // import "ekyu.moe/cryptonight/groestl"
 
 import (
 	"hash"
@@ -25,7 +25,6 @@ import (
 //
 // It should be empty after they are expanded by cpp(1).
 const _ = `
-
 
 
 
@@ -159,7 +158,7 @@ func (s *state) Sum(b []byte) []byte {
 
 	// store hash result
 	dgst := make([]byte, hashByteLen)
-	c := ((*[((size512 / 4) - (0)) * 4]uint8)(unsafe.Pointer(&s.chaining[0])))
+	c := ((*[((size512 / 4) - (0)) * 4]uint8)(unsafe.Pointer(&s.chaining[(0)])))
 	copy(dgst, c[size512-hashByteLen:size512])
 
 	return append(b, dgst...)
@@ -194,16 +193,16 @@ func (s *state) outputTransformation() {
 	for j = 0; j < 2*cols512; j++ {
 		temp[j] = s.chaining[j]
 	}
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&temp[0]))), &y, 0x00000000)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000001)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000002)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000003)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000004)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000005)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000006)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000007)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000008)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &temp, 0x00000009)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&temp[(0)]))), &y, 0x00000000)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000001)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000002)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000003)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000004)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000005)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000006)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000007)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000008)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &temp, 0x00000009)
 	for j = 0; j < 2*cols512; j++ {
 		s.chaining[j] ^= temp[j]
 	}
@@ -220,28 +219,28 @@ func f512(h *[16]uint32, m []uint32) {
 	}
 
 	// compute Q(m)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x01000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x02000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x03000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x04000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x05000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x06000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x07000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x08000000)
-	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &Qtmp, 0x09000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x01000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x02000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x03000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x04000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x05000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x06000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x07000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x08000000)
+	rnd512q(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &Qtmp, 0x09000000)
 
 	// compute P(h+m)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&Ptmp[0]))), &y, 0x00000000)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000001)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000002)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000003)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000004)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000005)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000006)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &z, 0x00000007)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[0]))), &y, 0x00000008)
-	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[0]))), &Ptmp, 0x00000009)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&Ptmp[(0)]))), &y, 0x00000000)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000001)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000002)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000003)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000004)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000005)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000006)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &z, 0x00000007)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&z[(0)]))), &y, 0x00000008)
+	rnd512p(((*[((2 * cols512) - (0)) * 4]uint8)(unsafe.Pointer(&y[(0)]))), &Ptmp, 0x00000009)
 
 	// compute P(h+m) + Q(m) + h
 	for i = 0; i < 2*cols512; i++ {
@@ -252,7 +251,7 @@ func f512(h *[16]uint32, m []uint32) {
 // compute one round of Q (short variants)
 func rnd512q(x *[64]byte, y *[16]uint32, r uint32) {
 	var temp1, temp2, tempUpperValue, tempLowerValue, temp uint32
-	x32 := ((*[((64) - (0)) / 4]uint32)(unsafe.Pointer(&x[0])))
+	x32 := ((*[((64) - (0)) / 4]uint32)(unsafe.Pointer(&x[(0)])))
 	x32[0] = ^x32[0]
 	x32[1] ^= 0xffffffff ^ r
 	x32[2] = ^x32[2]
@@ -658,7 +657,7 @@ func rnd512q(x *[64]byte, y *[16]uint32, r uint32) {
 // compute one round of P (short variants)
 func rnd512p(x *[64]byte, y *[16]uint32, r uint32) {
 	var temp1, temp2, tempUpperValue, tempLowerValue, temp uint32
-	x32 := ((*[((64) - (0)) / 4]uint32)(unsafe.Pointer(&x[0])))
+	x32 := ((*[((64) - (0)) / 4]uint32)(unsafe.Pointer(&x[(0)])))
 	x32[0] ^= 0x00000000 ^ r
 	x32[2] ^= 0x00000010 ^ r
 	x32[4] ^= 0x00000020 ^ r

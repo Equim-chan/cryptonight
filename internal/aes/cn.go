@@ -7,7 +7,7 @@ package aes
 //
 // Note that this is CryptoNight specific.
 // This is non-standard AES!
-func CnExpandKey(key []byte, rkeys []uint32) {
+func CnExpandKey(key []uint64, rkeys *[40]uint32) {
 	cnExpandKey(key, rkeys)
 }
 
@@ -18,7 +18,7 @@ func CnExpandKey(key []byte, rkeys []uint32) {
 //
 // Note that this is CryptoNight specific.
 // This is non-standard AES!
-func CnRounds(dst, src []byte, rkeys []uint32) {
+func CnRounds(dst, src []uint64, rkeys *[40]uint32) {
 	cnRounds(dst, src, rkeys)
 }
 
@@ -30,6 +30,6 @@ func CnRounds(dst, src []byte, rkeys []uint32) {
 //
 // Note that this is CryptoNight specific.
 // CnSingleRound * 10 might not be equivalent to one CnRounds.
-func CnSingleRound(dst, src []byte, rkey []uint32) {
+func CnSingleRound(dst, src []uint64, rkey *[4]uint32) {
 	cnSingleRound(dst, src, rkey)
 }

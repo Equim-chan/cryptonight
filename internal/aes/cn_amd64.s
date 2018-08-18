@@ -1,6 +1,6 @@
 #include "textflag.h"
 
-// func cnRoundsAsm(dst, src *byte, rkeys *uint32)
+// func cnRoundsAsm(dst, src *uint64, rkeys *uint32)
 TEXT ·cnRoundsAsm(SB), NOSPLIT, $0
     MOVQ dst+0(FP), AX
     MOVQ src+8(FP), BX
@@ -29,7 +29,7 @@ TEXT ·cnRoundsAsm(SB), NOSPLIT, $0
     MOVUPS X0, 0(AX)
     RET
 
-// func cnSingleRoundAsm(dst, src *byte, rkey *uint32)
+// func cnSingleRoundAsm(dst, src *uint64, rkey *uint32)
 TEXT ·cnSingleRoundAsm(SB), NOSPLIT, $0
     MOVQ dst+0(FP), AX
     MOVQ src+8(FP), BX
@@ -40,7 +40,7 @@ TEXT ·cnSingleRoundAsm(SB), NOSPLIT, $0
     MOVUPS X0, 0(AX)
     RET
 
-// func cnExpandKeyAsm(key *byte, rkey *uint32)
+// func cnExpandKeyAsm(key *uint64, rkey *uint32)
 // Note that round keys are stored in uint128 format, not uint32
 TEXT ·cnExpandKeyAsm(SB), NOSPLIT, $0
     MOVQ key+0(FP), AX

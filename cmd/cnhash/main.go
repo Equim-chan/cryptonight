@@ -66,6 +66,10 @@ func main() {
 		blob = h
 	}
 
+	if variant == 1 && len(blob) < 43 {
+		log.Fatal("variant 1 requires at least 43 bytes of input.")
+	}
+
 	sum := cryptonight.Sum(blob, variant)
 	diff := uint64(0)
 	if includeDiff {

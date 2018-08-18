@@ -12,7 +12,7 @@
 // Most comments in the original file is copied as well.
 //
 // In this implementation, we assume all bytes are full.
-package groestl
+package groestl // import "ekyu.moe/cryptonight/groestl"
 
 import (
 	"hash"
@@ -29,11 +29,10 @@ const _ = `
 #undef ignore
 
 #define U8_U32(a, begin, end) \
-	((*[((end) - (begin)) / 4]uint32)(unsafe.Pointer(&a[begin])))
+    ( (*[( (end) - (begin) ) / 4]uint32)(unsafe.Pointer(&a[ (begin) ])) )
 
 #define U32_U8(a, begin, end) \
-	((*[((end) - (begin)) * 4]uint8)(unsafe.Pointer(&a[begin])))
-
+    ( (*[( (end) - (begin) ) * 4]uint8)(unsafe.Pointer(&a[ (begin) ])) )
 
 #define ROTL32(v, n) \
 	((((v) << (n)) | ((v) >> (32 - (n)))) & 0xffffffff)
