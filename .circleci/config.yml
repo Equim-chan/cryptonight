@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.10.3
+    working_directory: /go/src/ekyu.moe/cryptonight
+    steps:
+      - checkout
+      - run: go get -v -t -d ./...
+      - run:
+          name: Preprocess
+          command: go generate ekyu.moe/cryptonight/...
+      - run:
+          name: gofmt
+          command: diff -u <(echo -n) <(gofmt -d .)
+      - run:
+          name: govet
+          command: go vet ./...
+      - run:
+          name: test and coverage
+          command: |
+            go test -v -race -coverprofile=coverage.txt -covermode=atomic &&
+            bash <(curl -s https://codecov.io/bash)

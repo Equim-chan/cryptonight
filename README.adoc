@@ -47,7 +47,7 @@ func ExampleSum() {
 == Development
 While this repository is already out-of-box, which means what you need to do to use it in your code is just a `go get` (or `dep ensure -add` whatsoever), in case you want to hack on this library, some additional steps are required since it uses code generation.
 
-=== Proprocess
+=== Preprocess
 If you modified a source file in this library that uses C-kind macros (the comments tells), in order to expand them and generate the final code, https://linux.die.net/man/1/cpp[cpp(1)] is needed, which a part of GCC toolchain and should be already available if you have installed gcc (or MinGW for Windows) in your machine.
 
 Once some modification is made in a file that used macro, simply use `go generate ekyu.moe/cryptonight/\...` to run the gcc preprocessor on them.

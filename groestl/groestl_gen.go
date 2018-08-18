@@ -16,6 +16,7 @@ package groestl // import "ekyu.moe/cryptonight/groestl"
 
 import (
 	"hash"
+	"unsafe"
 )
 
 // This field is for macro definitions.
@@ -30,6 +31,9 @@ const _ = `
 
 
 `
+
+// To trick goimports(1)
+var _ = unsafe.Pointer(nil)
 
 const (
 	rows           = 8

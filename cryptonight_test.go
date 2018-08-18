@@ -18,7 +18,7 @@ type diffSpec struct {
 
 var (
 	hashSpecsV0 = []hashSpec{
-		// From cns008
+		// From CNS008
 		{"", "eb14e8a833fac6fe9a43b57b336789c46ffe93f2868452240720607b14387e11", 0},
 		{
 			"5468697320697320612074657374", // "This is a test"
