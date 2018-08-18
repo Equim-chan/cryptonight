@@ -6,10 +6,9 @@ import (
 )
 
 func u8u32Slice(a []uint8) []uint32 {
-	ref := a
-	targetLen := len(ref) / 4
-	targetCap := cap(ref) / 4
-	target := (*(*[]uint32)(unsafe.Pointer(&ref)))
+	targetLen := len(a) / 4
+	targetCap := cap(a) / 4
+	target := (*(*[]uint32)(unsafe.Pointer(&a)))
 
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&target))
 	header.Len = targetLen
@@ -19,10 +18,9 @@ func u8u32Slice(a []uint8) []uint32 {
 }
 
 func u32u8Slice(a []uint32) []uint8 {
-	ref := a
-	targetLen := len(ref) * 4
-	targetCap := cap(ref) * 4
-	target := (*(*[]uint8)(unsafe.Pointer(&ref)))
+	targetLen := len(a) * 4
+	targetCap := cap(a) * 4
+	target := (*(*[]uint8)(unsafe.Pointer(&a)))
 
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&target))
 	header.Len = targetLen

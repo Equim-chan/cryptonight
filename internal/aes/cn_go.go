@@ -62,3 +62,14 @@ func cnSingleRoundGo(dst, src []uint64, rkey *[4]uint32) {
 	dst8[8], dst8[9], dst8[10], dst8[11] = byte(t2), byte(t2>>8), byte(t2>>16), byte(t2>>24)
 	dst8[12], dst8[13], dst8[14], dst8[15] = byte(t3), byte(t3>>8), byte(t3>>16), byte(t3>>24)
 }
+
+// Apply sbox0 to each byte in w.
+func subw(w uint32) uint32 {
+	return uint32(sbox0[w>>24])<<24 |
+		uint32(sbox0[w>>16&0xff])<<16 |
+		uint32(sbox0[w>>8&0xff])<<8 |
+		uint32(sbox0[w&0xff])
+}
+
+// Rotate
+func rotw(w uint32) uint32 { return w<<8 | w>>24 }

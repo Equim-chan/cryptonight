@@ -1,0 +1,55 @@
+= cryptonight
+Equim <https://github.com/Equim-chan[@Equim-chan]>
+
+image:https://img.shields.io/travis/Equim-chan/cryptonight.svg[Travis, link=https://travis-ci.org/Equim-chan/cryptonight]
+image:http://img.shields.io/badge/godoc-reference-5272B4.svg[GoDoc, link=https://godoc.org/ekyu.moe/cryptonight]
+image:https://goreportcard.com/badge/github.com/Equim-chan/cryptonight[Go Report Card, link=https://goreportcard.com/report/github.com/Equim-chan/cryptonight]
+image:https://img.shields.io/github/license/Equim-chan/cryptonight.svg[License, link=https://github.com/Equim-chan/cryptonight/blob/master/LICENSE]
+
+Pure Go/ASM implementation of CryptoNight hash function and some of its variant, without any CGO bindings.
+
+== Features
+* Support for Monero v7 variant. https://github.com/monero-project/monero/pull/4218/[Variant 2] is underway.
+* No CGO hell, making builds easier and faster.
+* Hardware acceleration available for amd64 architecture.
+* Basic support for https://godoc.org/ekyu.moe/cryptonight#Cache[cache], since it is memory hard.
+
+== Install
+[source,shell]
+----
+$ go get -u ekyu.moe/cryptonight
+----
+
+A CLI utility is also available with `go get -u ekyu.moe/cryptonight/cmd/cnhash`.
+
+== Example
+[source,go]
+----
+package main
+
+import (
+    "fmt"
+
+    "ekyu.moe/cryptonight"
+)
+
+func ExampleSum() {
+    blob := []byte("Hello, 世界")
+    fmt.Printf("%x\n", Sum(blob, 0)) // original
+    // Output: 0999794e4e20d86e6a81b54495aeb370b6a9ae795fb5af4f778afaf07c0b2e0e
+
+    blob = []byte("variant 1 requires at least 43 bytes of input.")
+    fmt.Printf("%x\n", Sum(blob, 1)) // variant 1
+    // Output: 261124c5a6dca5d4aa3667d328a94ead9a819ae714e1f1dc113ceeb14f1ecf99
+}
+----
+
+== Development
+Note that this repository is already out-of-box, you only need a `go get` (or `dep ensure -add` whatsoever) to use it in your code and that's all, but in case you want to hack on this library, some additional steps are required since it uses code generation.
+
+If you modified a source file in this library that uses C-kind macros (the comments tells), in order to expand them and generate the final code, https://linux.die.net/man/1/cpp[cpp(1)] is needed, which a part of GCC toolchain and should be already available if you have installed gcc (or MinGW for Windows) in your machine.
+
+Once some modification is made in a file that used macro, simply use `go generate ekyu.moe/cryptonight/...` to run the gcc preprocessor on them.
+
+== License
+https://github.com/Equim-chan/cryptonight/blob/master/LICENSE[MIT]

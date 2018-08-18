@@ -1,4 +1,4 @@
-package aes
+package aes // import "ekyu.moe/cryptonight/internal/aes"
 
 // CnExpandKey expands exactly 10 round keys.
 //

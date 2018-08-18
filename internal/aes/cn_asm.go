@@ -2,6 +2,12 @@
 
 package aes
 
+import (
+	"ekyu.moe/cryptonight/internal/aes/cpu"
+)
+
+var supportsAES = cpu.X86.HasAES || cpu.ARM64.HasAES
+
 func cnExpandKey(key []uint64, rkeys *[40]uint32) {
 	if !supportsAES {
 		cnExpandKeyGo(key, rkeys)
