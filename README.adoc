@@ -44,8 +44,8 @@ func ExampleSum() {
     // Output: 261124c5a6dca5d4aa3667d328a94ead9a819ae714e1f1dc113ceeb14f1ecf99
 
     blob = []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
-    fmt.Printf("%x\n", Sum(blob, 1)) // variant 2
-    // Output: 5ede92fdef14a546b22a153d6fe712be149dbb43681197d62da01c41673b1130
+    fmt.Printf("%x\n", Sum(blob, 2)) // variant 2
+    // Output: 5fedb55ec287cc6b508b1a2058ea62011ef054c46ef02bae4d148488dc72f3db
 }
 ----
 
