@@ -1,7 +1,6 @@
 package cryptonight
 
 import (
-	"crypto/rand"
 	"encoding/hex"
 	"testing"
 )
@@ -47,6 +46,19 @@ var (
 			1,
 		},
 	}
+	hashSpecsV2 = []hashSpec{
+		// From monero: tests/hash/test-slow-2.txt
+		{"5468697320697320612074657374205468697320697320612074657374205468697320697320612074657374", "2e6ee8cc718c61d3a59ecdfca6e56ca5f560b4bb75c201ed3bb001c407833e79", 2},
+		{"4c6f72656d20697073756d20646f6c6f722073697420616d65742c20636f6e73656374657475722061646970697363696e67", "35957227ce70064db4c1b5ece364282fd5425bf4fee5a0e3595b9f3f5067b90b", 2},
+		{"656c69742c2073656420646f20656975736d6f642074656d706f7220696e6369646964756e74207574206c61626f7265", "f6398c333cb775cbf81fbb1043f0d7c791dac5bf6182f6ad782ba11fe6c7234f", 2},
+		{"657420646f6c6f7265206d61676e6120616c697175612e20557420656e696d206164206d696e696d2076656e69616d2c", "5bb096fc037aabc50d7e84b356ea673357684e7d29395bd32b876440efcbaf72", 2},
+		{"71756973206e6f737472756420657865726369746174696f6e20756c6c616d636f206c61626f726973206e697369", "f3e44470ff4bc947c4cb020168d636fc894c3c07629266b93e2fbcf42d9664a5", 2},
+		{"757420616c697175697020657820656120636f6d6d6f646f20636f6e7365717561742e20447569732061757465", "13d3dc2794414932050ff7b165de51b283018990f111c3191bca66fe986fdab9", 2},
+		{"697275726520646f6c6f7220696e20726570726568656e646572697420696e20766f6c7570746174652076656c6974", "9fcaa9892f1faef36624d865cb7e7588b4b74fc581b7195b586b3b0e802b72b8", 2},
+		{"657373652063696c6c756d20646f6c6f726520657520667567696174206e756c6c612070617269617475722e", "30c262cf4592136088dcf1064b732c29550b46accf54d7993d8532f5a5a9e0f3", 2},
+		{"4578636570746575722073696e74206f6363616563617420637570696461746174206e6f6e2070726f6964656e742c", "88536691d2d8eb6c8dfbb2597ab50fbbd9f8c2834281e1bb70616f48094d68c8", 2},
+		{"73756e7420696e2063756c706120717569206f666669636961206465736572756e74206d6f6c6c697420616e696d20696420657374206c61626f72756d2e", "5964da99f4a273393e464f40070122f045eecfed1309ac25dd322e1fb052dc45", 2},
+	}
 
 	diffSpecs = []diffSpec{
 		// From monero-stratum: util/util_test.go
@@ -65,7 +77,7 @@ func run(t *testing.T, hashSpecs []hashSpec) {
 		in, _ := hex.DecodeString(v.input)
 		result := Sum(in, v.variant)
 		if hex.EncodeToString(result) != v.output {
-			t.Fatalf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
+			t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
 		}
 	}
 }
@@ -76,7 +88,7 @@ func runCached(t *testing.T, hashSpecs []hashSpec) {
 		in, _ := hex.DecodeString(v.input)
 		result := cache.Sum(in, v.variant)
 		if hex.EncodeToString(result) != v.output {
-			t.Fatalf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
+			t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
 		}
 	}
 }
@@ -96,11 +108,13 @@ func TestSum(t *testing.T) {
 			Sum([]byte("Obviously less than 43 bytes"), 1)
 		}()
 	})
+	t.Run("v2", func(t *testing.T) { run(t, hashSpecsV2) })
 }
 
 func TestSumCached(t *testing.T) {
 	t.Run("v0", func(t *testing.T) { runCached(t, hashSpecsV0) })
 	t.Run("v1", func(t *testing.T) { runCached(t, hashSpecsV1) })
+	t.Run("v2", func(t *testing.T) { runCached(t, hashSpecsV2) })
 }
 
 func TestDifficulty(t *testing.T) {
@@ -108,7 +122,7 @@ func TestDifficulty(t *testing.T) {
 		in, _ := hex.DecodeString(v.input)
 		result := Difficulty(in)
 		if result != v.output {
-			t.Fatalf("\n[%d] expected:\n\t%v\ngot:\n\t%v\n", i, v.output, result)
+			t.Errorf("\n[%d] expected:\n\t%v\ngot:\n\t%v\n", i, v.output, result)
 		}
 	}
 
@@ -124,8 +138,8 @@ func TestDifficulty(t *testing.T) {
 }
 
 func BenchmarkSum(b *testing.B) {
-	data := make([]byte, 70)
-	rand.Read(data)
+	data := []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
+	cache := new(Cache)
 
 	b.Run("v0", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
@@ -133,7 +147,6 @@ func BenchmarkSum(b *testing.B) {
 		}
 	})
 	b.Run("v0-cached", func(b *testing.B) {
-		cache := new(Cache)
 		for i := 0; i < b.N; i++ {
 			cache.Sum(data, 0)
 		}
@@ -145,9 +158,19 @@ func BenchmarkSum(b *testing.B) {
 		}
 	})
 	b.Run("v1-cached", func(b *testing.B) {
-		cache := new(Cache)
 		for i := 0; i < b.N; i++ {
 			cache.Sum(data, 1)
+		}
+	})
+
+	b.Run("v2", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			Sum(data, 2)
+		}
+	})
+	b.Run("v2-cached", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			cache.Sum(data, 2)
 		}
 	})
 }

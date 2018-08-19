@@ -9,6 +9,7 @@ package cryptonight // import "ekyu.moe/cryptonight"
 import (
 	"encoding/binary"
 	"hash"
+	"math"
 	"runtime"
 	"unsafe"
 
@@ -26,6 +27,9 @@ import (
 //
 // It should be empty after they are expanded by cpp(1).
 const _ = `
+
+
+
 
 
 
@@ -100,12 +104,21 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 	// as per CNS008 sec.3 Scratchpad Initialization
 	sha3.Keccak1600State(&cache.finalState, data)
 
-	tweak := uint64(0)
+	// for variant 1
+	var tweak, t uint64
 	if variant == 1 {
 		// that's why data must have more than 43 bytes
 		tweak = cache.finalState[24] ^ binary.LittleEndian.Uint64(data[35:43])
 	}
 
+	// for variant 2
+	var (
+		divisionResult, sqrtResult uint64
+		dividend, divisor          uint64
+		chunk0, chunk1, chunk2     *[8]uint16 // references
+	)
+
+	// scratchpad init
 	key := cache.finalState[:4]
 	rkeys := new([40]uint32) // 10 rounds, instead of 14 as in standard AES-256
 	aes.CnExpandKey(key, rkeys)
@@ -120,11 +133,9 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 	}
 
 	// as per CNS008 sec.4 Memory-Hard Loop
-	a, b := new([2]uint64), new([2]uint64)
-	c, d := new([2]uint64), new([2]uint64)
+	a, b, c := new([2]uint64), new([2]uint64), new([2]uint64)
 	product := new([2]uint64) // product in byteMul step
 	addr := uint64(0)         // address index
-	t := uint64(0)            // for variant 1
 
 	a[0] = cache.finalState[0] ^ cache.finalState[4]
 	a[1] = cache.finalState[1] ^ cache.finalState[5]
@@ -134,6 +145,14 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 	for i := 0; i < 524288; i++ {
 		addr = (((a[0]) & 0x1ffff0) >> 3)
 		aes.CnSingleRound(c[:], cache.scratchpad[addr:], ((*[((2) - (0)) * 2]uint32)(unsafe.Pointer(&a[(0)]))))
+
+		if variant == 2 {
+			chunk0 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x02)])))
+			chunk1 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x04)])))
+			chunk2 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x06)])))
+			chunk0[0], chunk0[1], chunk0[2], chunk0[3], chunk0[4], chunk0[5], chunk0[6], chunk0[7], chunk1[0], chunk1[1], chunk1[2], chunk1[3], chunk1[4], chunk1[5], chunk1[6], chunk1[7], chunk2[0], chunk2[1], chunk2[2], chunk2[3], chunk2[4], chunk2[5], chunk2[6], chunk2[7] = chunk2[2], chunk2[6], chunk2[3], chunk2[7], chunk2[0], chunk2[1], chunk2[4], chunk2[5], chunk0[2], chunk0[5], chunk0[3], chunk0[4], chunk0[6], chunk0[7], chunk0[0], chunk0[1], chunk1[1], chunk1[5], chunk1[0], chunk1[4], chunk1[2], chunk1[3], chunk1[6], chunk1[7]
+		}
+
 		cache.scratchpad[addr] = b[0] ^ c[0]
 		cache.scratchpad[addr+1] = b[1] ^ c[1]
 		b[0], b[1] = c[0], c[1]
@@ -144,18 +163,35 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 			cache.scratchpad[addr+1] ^= t << 24
 		}
 
-		addr = (((c[0]) & 0x1ffff0) >> 3)
-		d[0] = cache.scratchpad[addr]
-		d[1] = cache.scratchpad[addr+1]
-		byteMul(product, c[0], d[0])
+		addr = (((b[0]) & 0x1ffff0) >> 3)
+		c[0] = cache.scratchpad[addr]
+		c[1] = cache.scratchpad[addr+1]
+
+		if variant == 2 {
+			c[1] ^= divisionResult ^ sqrtResult
+			dividend = b[1]
+			divisor = b[0]&0xffffffff | 0x80000001
+			divisionResult = (dividend/divisor)&0xffffffff | ((dividend % divisor) << 32)
+			sqrtResult = uint64(math.Sqrt(float64((b[0] + divisionResult) >> 16)))
+		}
+
+		byteMul(product, b[0], c[0])
+
+		if variant == 2 {
+			chunk0 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x02)])))
+			chunk1 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x04)])))
+			chunk2 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x06)])))
+			chunk0[0], chunk0[1], chunk0[2], chunk0[3], chunk0[4], chunk0[5], chunk0[6], chunk0[7], chunk1[0], chunk1[1], chunk1[2], chunk1[3], chunk1[4], chunk1[5], chunk1[6], chunk1[7], chunk2[0], chunk2[1], chunk2[2], chunk2[3], chunk2[4], chunk2[5], chunk2[6], chunk2[7] = chunk2[2], chunk2[6], chunk2[3], chunk2[7], chunk2[0], chunk2[1], chunk2[4], chunk2[5], chunk0[2], chunk0[5], chunk0[3], chunk0[4], chunk0[6], chunk0[7], chunk0[0], chunk0[1], chunk1[1], chunk1[5], chunk1[0], chunk1[4], chunk1[2], chunk1[3], chunk1[6], chunk1[7]
+		}
+
 		// byteAdd
 		a[0] += product[0]
 		a[1] += product[1]
 
 		cache.scratchpad[addr] = a[0]
 		cache.scratchpad[addr+1] = a[1]
-		a[0] ^= d[0]
-		a[1] ^= d[1]
+		a[0] ^= c[0]
+		a[1] ^= c[1]
 
 		if variant == 1 {
 			cache.scratchpad[addr+1] ^= tweak

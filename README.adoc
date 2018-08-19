@@ -10,7 +10,7 @@ image:https://img.shields.io/github/license/Equim-chan/cryptonight.svg[License, 
 Pure Go/ASM implementation of CryptoNight hash function and some of its variant, without any CGO binding.
 
 == Features
-* Support for Monero v7 variant. https://github.com/monero-project/monero/pull/4218/[Variant 2] is underway.
+* Support for Monero v7 variant, and the upcoming https://github.com/monero-project/monero/pull/4218/[variant 2]!
 * No CGO hell, making builds easier and faster.
 * Hardware acceleration available for amd64 architecture.
 * Basic https://godoc.org/ekyu.moe/cryptonight#Cache[cache] support, since it is memory hard.
@@ -42,6 +42,10 @@ func ExampleSum() {
     blob = []byte("variant 1 requires at least 43 bytes of input.")
     fmt.Printf("%x\n", Sum(blob, 1)) // variant 1
     // Output: 261124c5a6dca5d4aa3667d328a94ead9a819ae714e1f1dc113ceeb14f1ecf99
+
+    blob = []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
+    fmt.Printf("%x\n", Sum(blob, 1)) // variant 2
+    // Output: 5ede92fdef14a546b22a153d6fe712be149dbb43681197d62da01c41673b1130
 }
 ----
 
@@ -63,6 +67,11 @@ Once some modification is made in a file that used macro, simply use `go generat
 ``ekyu.moe/cryptonight/groestl``:: Grøstl-256 implementation. It is directly ported from C and not quite optimized.
 
 ``ekyu.moe/cryptonight/jh``:: JH-256 implementation. It is directly ported from C and not quite optimized.
+
+=== TODO
+* [ ] ARM64-specific optimization
+* [ ] Tests on other architectures
+* [ ] Improve performance for variant 2
 
 == License
 https://github.com/Equim-chan/cryptonight/blob/master/LICENSE[MIT]

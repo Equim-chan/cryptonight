@@ -221,7 +221,8 @@ func (s *state) transform(b []byte) {
 	// digest message, one block at a time
 	for n >= size512 {
 		input := b[offset:]
-		f512(&s.chaining, u8u32Slice(input))
+		// length of input is known and constant
+		f512(&s.chaining, U8_U32(input, 0, size512))
 
 		// increment block counter
 		s.blockCounter1++
@@ -258,7 +259,7 @@ func (s *state) outputTransformation() {
 }
 
 // compute compression function (short variants)
-func f512(h *[16]uint32, m []uint32) {
+func f512(h *[16]uint32, m *[size512 / 4]uint32) {
 	var i int
 	var Ptmp, Qtmp, y, z [2 * cols512]uint32
 
