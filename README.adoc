@@ -60,8 +60,6 @@ Once some modification is made in a file that used macro, simply use `go generat
 === Packages information
 ``ekyu.moe/cryptonight/internal/aes``:: From Go's crypto/aes. Since CryptoNight's use of AES is quite non-standard and not intended for encryption, you must use this package this package with care for project that's not CryptoNight associated.
 
-``ekyu.moe/cryptonight/internal/aes/cpu``:: From Go's internal/cpu. This is a dependancy for aes package which is used to detect if the CPU supports AES-NI.
-
 ``ekyu.moe/cryptonight/internal/sha3``:: From Go's golang.org/x/crypto/sha3. All CryptoNight specific additional works are made in `cn.go` only; other files are untouched at all.
 
 ``ekyu.moe/cryptonight/groestl``:: Grøstl-256 implementation. It is directly ported from C and not quite optimized.
