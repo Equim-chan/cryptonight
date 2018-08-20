@@ -30,9 +30,6 @@ const _ = `
 
 
 
-
-
-
 `
 
 // To trick goimports(1).
@@ -90,8 +87,8 @@ var _ = unsafe.Pointer(nil)
 //
 // The zero value for Cache is ready to use.
 type Cache struct {
-	finalState [25]uint64                  // state of keccak1600
 	scratchpad [2 * 1024 * 1024 / 8]uint64 // 2 MiB scratchpad for memhard loop
+	finalState [25]uint64                  // state of keccak1600
 }
 
 // Sum calculate a CryptoNight hash digest. The return value is exactly 32 bytes
@@ -115,7 +112,6 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 	var (
 		divisionResult, sqrtResult uint64
 		dividend, divisor          uint64
-		chunk0, chunk1, chunk2     *[8]uint16 // references
 	)
 
 	// scratchpad init
@@ -147,10 +143,7 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 		aes.CnSingleRound(c[:], cache.scratchpad[addr:], ((*[((2) - (0)) * 2]uint32)(unsafe.Pointer(&a[(0)]))))
 
 		if variant == 2 {
-			chunk0 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x02)])))
-			chunk1 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x04)])))
-			chunk2 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x06)])))
-			chunk0[0], chunk0[1], chunk0[2], chunk0[3], chunk0[4], chunk0[5], chunk0[6], chunk0[7], chunk1[0], chunk1[1], chunk1[2], chunk1[3], chunk1[4], chunk1[5], chunk1[6], chunk1[7], chunk2[0], chunk2[1], chunk2[2], chunk2[3], chunk2[4], chunk2[5], chunk2[6], chunk2[7] = chunk2[2], chunk2[6], chunk2[3], chunk2[7], chunk2[0], chunk2[1], chunk2[4], chunk2[5], chunk0[2], chunk0[5], chunk0[3], chunk0[4], chunk0[6], chunk0[7], chunk0[0], chunk0[1], chunk1[1], chunk1[5], chunk1[0], chunk1[4], chunk1[2], chunk1[3], chunk1[6], chunk1[7]
+			cache.v2Shuffle(addr)
 		}
 
 		cache.scratchpad[addr] = b[0] ^ c[0]
@@ -178,10 +171,7 @@ func (cache *Cache) Sum(data []byte, variant int) []byte {
 		byteMul(product, b[0], c[0])
 
 		if variant == 2 {
-			chunk0 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x02)])))
-			chunk1 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x04)])))
-			chunk2 = ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[(addr ^ 0x06)])))
-			chunk0[0], chunk0[1], chunk0[2], chunk0[3], chunk0[4], chunk0[5], chunk0[6], chunk0[7], chunk1[0], chunk1[1], chunk1[2], chunk1[3], chunk1[4], chunk1[5], chunk1[6], chunk1[7], chunk2[0], chunk2[1], chunk2[2], chunk2[3], chunk2[4], chunk2[5], chunk2[6], chunk2[7] = chunk2[2], chunk2[6], chunk2[3], chunk2[7], chunk2[0], chunk2[1], chunk2[4], chunk2[5], chunk0[2], chunk0[5], chunk0[3], chunk0[4], chunk0[6], chunk0[7], chunk0[0], chunk0[1], chunk1[1], chunk1[5], chunk1[0], chunk1[4], chunk1[2], chunk1[3], chunk1[6], chunk1[7]
+			cache.v2Shuffle(addr)
 		}
 
 		// byteAdd

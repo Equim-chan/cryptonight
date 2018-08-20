@@ -3,13 +3,15 @@
 package aes
 
 import (
-	"ekyu.moe/cryptonight/internal/aes/cpu"
+	"golang.org/x/sys/cpu"
 )
 
-var supportsAES = cpu.X86.HasAES || cpu.ARM64.HasAES
+var (
+	hasAES = cpu.X86.HasAES
+)
 
 func cnExpandKey(key []uint64, rkeys *[40]uint32) {
-	if !supportsAES {
+	if !hasAES {
 		cnExpandKeyGo(key, rkeys)
 	} else {
 		cnExpandKeyAsm(&key[0], &rkeys[0])
@@ -17,7 +19,7 @@ func cnExpandKey(key []uint64, rkeys *[40]uint32) {
 }
 
 func cnRounds(dst, src []uint64, rkeys *[40]uint32) {
-	if !supportsAES {
+	if !hasAES {
 		cnRoundsGo(dst, src, rkeys)
 	} else {
 		cnRoundsAsm(&dst[0], &src[0], &rkeys[0])
@@ -25,7 +27,7 @@ func cnRounds(dst, src []uint64, rkeys *[40]uint32) {
 }
 
 func cnSingleRound(dst, src []uint64, rkey *[4]uint32) {
-	if !supportsAES {
+	if !hasAES {
 		cnSingleRoundGo(dst, src, rkey)
 	} else {
 		cnSingleRoundAsm(&dst[0], &src[0], &rkey[0])
