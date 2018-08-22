@@ -15,6 +15,6 @@ TEXT ·mul128(SB), NOSPLIT, $0
     MOVQ high+8(FP), CX
     MOVQ x+16(FP), AX
     MULQ y+24(FP)
-    MOVQ AX, BX
-    MOVQ DX, CX
+    MOVQ AX, (BX)
+    MOVQ DX, (CX)
     RET

@@ -31,7 +31,8 @@ func Difficulty(hash []byte) uint64 {
 }
 
 // CheckHash checks hash's difficulty agains diff. It returns true if hash's
-// difficulty is equal to or greater than diff.
+// difficulty is equal to or greater than diff. hash must be at least 32 bytes
+// long, otherwise it will panic straightforward.
 //
 // CheckHash should be prefered over Difficulty if you only want to check if some
 // hash passes a specific difficulty, as CheckHash is very fast and requires
