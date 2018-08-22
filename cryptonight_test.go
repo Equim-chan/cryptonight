@@ -118,6 +118,9 @@ func TestDifficulty(t *testing.T) {
 
 		Difficulty([]byte("Obviously less than 32 bytes"))
 	}()
+
+	in, _ := hex.DecodeString("8e3c1865f22801dc3df0a688da80701e2390e7838e65c142604cc00eafe34000")
+	t.Logf("%v\n", CheckHash(in, 1009))
 }
 
 func BenchmarkSum(b *testing.B) {
@@ -140,4 +143,22 @@ func BenchmarkSum(b *testing.B) {
 			Sum(data, 2)
 		}
 	})
+}
+
+func BenchmarkDifficulty(b *testing.B) {
+	in, _ := hex.DecodeString("d3c693d2083888c03bc8dfbca4f32d9692e094722d8cbf4a90aa4c1400000000")
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		Difficulty(in)
+	}
+}
+
+func BenchmarkCheckHash(b *testing.B) {
+	in, _ := hex.DecodeString("d3c693d2083888c03bc8dfbca4f32d9692e094722d8cbf4a90aa4c1400000000")
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		CheckHash(in, 54164528257)
+	}
 }

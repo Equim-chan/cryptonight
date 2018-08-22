@@ -8,3 +8,13 @@ TEXT ·byteAddMul(SB), NOSPLIT, $0
     ADDQ DX, 0(CX)
     ADDQ AX, 8(CX)
     RET
+
+// func mul128(low, high *uint64, x, y uint64)
+TEXT ·mul128(SB), NOSPLIT, $0
+    MOVQ low+0(FP), BX
+    MOVQ high+8(FP), CX
+    MOVQ x+16(FP), AX
+    MULQ y+24(FP)
+    MOVQ AX, BX
+    MOVQ DX, CX
+    RET

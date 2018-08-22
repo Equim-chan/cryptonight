@@ -1,6 +1,8 @@
 package cryptonight
 
 import (
+	"encoding/binary"
+	"math"
 	"math/big"
 )
 
@@ -11,7 +13,10 @@ var (
 
 // Difficulty returns hash's difficulty. hash must be at least 32 bytes long,
 // otherwise it will panic straightforward.
+//
+// Difficulty is slower than CheckHash.
 func Difficulty(hash []byte) uint64 {
+	// swap byte order, since SetBytes accepts big instead of little endian
 	buf := make([]byte, 32)
 	for i := 0; i < 16; i++ {
 		buf[i], buf[31-i] = hash[31-i], hash[i]
@@ -23,4 +28,39 @@ func Difficulty(hash []byte) uint64 {
 	}
 
 	return hashBig.Div(oneLsh256, hashBig).Uint64()
+}
+
+// CheckHash checks hash's difficulty agains diff. It returns true if hash's
+// difficulty is equal to or greater than diff.
+//
+// CheckHash should be prefered over Difficulty if you only want to check if some
+// hash passes a specific difficulty, as CheckHash is very fast and requires
+// no heap allocation. It actually checks (hashDiff * diff) < 2^256 instead of
+// calculating the exact value of hashDiff.
+//
+// This function is a port of monero: src/cryptonote_basic/difficulty.cpp:check_hash
+func CheckHash(hash []byte, diff uint64) bool {
+	var low, high, top, cur, word uint64
+
+	word = binary.LittleEndian.Uint64(hash[24:])
+	mul128(&top, &high, word, diff)
+	if high != 0 {
+		return false
+	}
+
+	word = binary.LittleEndian.Uint64(hash)
+	mul128(&low, &cur, word, diff)
+	word = binary.LittleEndian.Uint64(hash[8:])
+	mul128(&low, &high, word, diff)
+
+	carry := cur+low < cur
+	cur = high
+
+	word = binary.LittleEndian.Uint64(hash[16:])
+	mul128(&low, &high, word, diff)
+
+	carry = cur+low < cur || (carry && cur+low == math.MaxUint64)
+	carry = high+top < high || (carry && high+top == math.MaxUint64)
+
+	return !carry
 }
