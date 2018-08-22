@@ -37,9 +37,9 @@ var _ = unsafe.Pointer(nil)
 // This is assumed and not checked by Sum. If this condition doesn't meet, Sum
 // will panic straightforward.
 func Sum(data []byte, variant int) []byte {
-	cache := pool.Get().(*cache)
+	cache := cachePool.Get().(*cache)
 	sum := cache.Sum(data, variant)
-	pool.Put(cache)
+	cachePool.Put(cache)
 
 	return sum
 }

@@ -10,18 +10,21 @@ import (
 	"ekyu.moe/cryptonight/jh"
 )
 
-// pool is a pool of cache.
-var pool = sync.Pool{
-	New: func() interface{} {
-		return &cache{
-			blocks: make([]uint64, 16),
-		}
-	},
-}
+var (
+	// cachePool is a pool of cache.
+	cachePool = sync.Pool{
+		New: func() interface{} {
+			return &cache{
+				blocks: make([]uint64, 16),
+			}
+		},
+	}
 
-var hashPool = []sync.Pool{
-	{New: func() interface{} { return blake256.New() }},
-	{New: func() interface{} { return groestl.New256() }},
-	{New: func() interface{} { return jh.New256() }},
-	{New: func() interface{} { return skein.New256(nil) }},
-}
+	// hashPool is for final hashes
+	hashPool = [...]*sync.Pool{
+		{New: func() interface{} { return blake256.New() }},
+		{New: func() interface{} { return groestl.New256() }},
+		{New: func() interface{} { return jh.New256() }},
+		{New: func() interface{} { return skein.New256(nil) }},
+	}
+)
