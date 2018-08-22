@@ -82,17 +82,6 @@ func run(t *testing.T, hashSpecs []hashSpec) {
 	}
 }
 
-func runCached(t *testing.T, hashSpecs []hashSpec) {
-	cache := new(Cache)
-	for i, v := range hashSpecs {
-		in, _ := hex.DecodeString(v.input)
-		result := cache.Sum(in, v.variant)
-		if hex.EncodeToString(result) != v.output {
-			t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
-		}
-	}
-}
-
 func TestSum(t *testing.T) {
 	t.Run("v0", func(t *testing.T) { run(t, hashSpecsV0) })
 	t.Run("v1", func(t *testing.T) {
@@ -109,12 +98,6 @@ func TestSum(t *testing.T) {
 		}()
 	})
 	t.Run("v2", func(t *testing.T) { run(t, hashSpecsV2) })
-}
-
-func TestSumCached(t *testing.T) {
-	t.Run("v0", func(t *testing.T) { runCached(t, hashSpecsV0) })
-	t.Run("v1", func(t *testing.T) { runCached(t, hashSpecsV1) })
-	t.Run("v2", func(t *testing.T) { runCached(t, hashSpecsV2) })
 }
 
 func TestDifficulty(t *testing.T) {
@@ -139,16 +122,10 @@ func TestDifficulty(t *testing.T) {
 
 func BenchmarkSum(b *testing.B) {
 	data := []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
-	cache := new(Cache)
 
 	b.Run("v0", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			Sum(data, 0)
-		}
-	})
-	b.Run("v0-cached", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			cache.Sum(data, 0)
 		}
 	})
 
@@ -157,20 +134,10 @@ func BenchmarkSum(b *testing.B) {
 			Sum(data, 1)
 		}
 	})
-	b.Run("v1-cached", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			cache.Sum(data, 1)
-		}
-	})
 
 	b.Run("v2", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			Sum(data, 2)
-		}
-	})
-	b.Run("v2-cached", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			cache.Sum(data, 2)
 		}
 	})
 }

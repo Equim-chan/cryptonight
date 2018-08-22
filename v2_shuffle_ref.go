@@ -2,6 +2,6 @@
 
 package cryptonight
 
-func (cache *Cache) v2Shuffle(offset uint64) {
-	cache.v2ShuffleGo(offset)
+func (cc *cache) v2Shuffle(offset uint64) {
+	cc.v2ShuffleGo(offset)
 }

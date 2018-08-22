@@ -61,7 +61,13 @@ func New256() hash.Hash {
 	return &state{hashbitlen: 256, x: jh256H0}
 }
 
-func (s *state) Reset()         { *s = state{hashbitlen: 256, x: jh256H0} }
+func (s *state) Reset() {
+	s.hashbitlen = 256
+	s.databitlen = 0
+	s.datasizeInBuffer = 0
+	s.x = jh256H0
+}
+
 func (s *state) Size() int      { return 32 }
 func (s *state) BlockSize() int { return 64 }
 

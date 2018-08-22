@@ -5,7 +5,7 @@ TEXT ·v2ShuffleAsm(SB), NOSPLIT, $0
     MOVQ    basePtr+0(FP), CX
     MOVQ    offset+8(FP), DX
     // since we use []uint64 instead of []uint8 as scratchpad, the offset applies too
-    IMULQ   $8, DX
+    SHLQ    $3, DX
     MOVQ    DX, R8
     MOVQ    DX, AX
     XORQ    $48, DX

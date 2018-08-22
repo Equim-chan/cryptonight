@@ -8,11 +8,11 @@ var (
 	hasAVX = cpu.X86.HasAVX
 )
 
-func (cache *Cache) v2Shuffle(offset uint64) {
+func (cc *cache) v2Shuffle(offset uint64) {
 	if hasAVX {
-		v2ShuffleAsm(&cache.scratchpad[0], offset)
+		v2ShuffleAsm(&cc.scratchpad[0], offset)
 	} else {
-		cache.v2ShuffleGo(offset)
+		cc.v2ShuffleGo(offset)
 	}
 }
 

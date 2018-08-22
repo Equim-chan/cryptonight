@@ -2,11 +2,11 @@ package cryptonight
 
 import "unsafe"
 
-func (cache *Cache) v2ShuffleGo(offset uint64) {
+func (cc *cache) v2ShuffleGo(offset uint64) {
 	// each chunk has 16 bytes, or 8 group of 2-bytes
-	chunk0 := ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[offset^0x02])))
-	chunk1 := ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[offset^0x04])))
-	chunk2 := ((*[8]uint16)(unsafe.Pointer(&cache.scratchpad[offset^0x06])))
+	chunk0 := ((*[8]uint16)(unsafe.Pointer(&cc.scratchpad[offset^0x02])))
+	chunk1 := ((*[8]uint16)(unsafe.Pointer(&cc.scratchpad[offset^0x04])))
+	chunk2 := ((*[8]uint16)(unsafe.Pointer(&cc.scratchpad[offset^0x06])))
 
 	// Shuffle modification
 	//   ( 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23) ->

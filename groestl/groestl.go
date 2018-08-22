@@ -33,12 +33,6 @@ const _ = `
 #define U32_U8(a, begin, end) \
     ( (*[( (end) - (begin) ) * 4]uint8)(unsafe.Pointer(&a[ (begin) ])) )
 
-#define ROTL32(v, n) \
-	((((v) << (n)) | ((v) >> (32 - (n)))) & 0xffffffff)
-
-#define u32BIG(a) \
-	((ROTL32(a, 8) & 0x00FF00FF) | (ROTL32(a, 24) & 0xFF00FF00))
-
 #define COLUMN(x, y, i, c0, c1, c2, c3, c4, c5, c6, c7, tv1, tv2, tu, tl, t) \
 	tu = tab[2*uint32(x[4*c0+0])];				\
 	tl = tab[2*uint32(x[4*c0+0])+1];			\
@@ -96,7 +90,10 @@ const (
 	hashByteLen = 32
 )
 
-var zeroBuf64 [size512]byte
+var (
+	zeroBuf64       [size512]byte
+	zeroBuf64Uint32 [size512 / 4]uint32
+)
 
 type state struct {
 	chaining [size512 / 4]uint32 // actual state
@@ -117,16 +114,18 @@ func Sum256(b []byte) []byte {
 
 func New256() hash.Hash {
 	s := &state{}
-	u := uint32(hashBitLen)
-	s.chaining[2*cols512-1] = u32BIG(u)
+	s.chaining[2*cols512-1] = 65536
 
 	return s
 }
 
 func (s *state) Reset() {
-	*s = state{}
-	u := uint32(hashBitLen)
-	s.chaining[2*cols512-1] = u32BIG(u)
+	copy(s.chaining[:], zeroBuf64Uint32[:])
+	s.chaining[2*cols512-1] = 65536
+	s.blockCounter1 = 0
+	s.blockCounter2 = 0
+	copy(s.buffer[:], zeroBuf64[:])
+	s.bufPtr = 0
 }
 
 func (s *state) Size() int      { return hashByteLen }

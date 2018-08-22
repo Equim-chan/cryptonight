@@ -28,8 +28,6 @@ const _ = `
 
 
 
-
-
 `
 
 // To trick goimports(1)
@@ -45,7 +43,10 @@ const (
 	hashByteLen = 32
 )
 
-var zeroBuf64 [size512]byte
+var (
+	zeroBuf64       [size512]byte
+	zeroBuf64Uint32 [size512 / 4]uint32
+)
 
 type state struct {
 	chaining [size512 / 4]uint32 // actual state
@@ -66,16 +67,18 @@ func Sum256(b []byte) []byte {
 
 func New256() hash.Hash {
 	s := &state{}
-	u := uint32(hashBitLen)
-	s.chaining[2*cols512-1] = ((((((u) << (8)) | ((u) >> (32 - (8)))) & 0xffffffff) & 0x00FF00FF) | (((((u) << (24)) | ((u) >> (32 - (24)))) & 0xffffffff) & 0xFF00FF00))
+	s.chaining[2*cols512-1] = 65536
 
 	return s
 }
 
 func (s *state) Reset() {
-	*s = state{}
-	u := uint32(hashBitLen)
-	s.chaining[2*cols512-1] = ((((((u) << (8)) | ((u) >> (32 - (8)))) & 0xffffffff) & 0x00FF00FF) | (((((u) << (24)) | ((u) >> (32 - (24)))) & 0xffffffff) & 0xFF00FF00))
+	copy(s.chaining[:], zeroBuf64Uint32[:])
+	s.chaining[2*cols512-1] = 65536
+	s.blockCounter1 = 0
+	s.blockCounter2 = 0
+	copy(s.buffer[:], zeroBuf64[:])
+	s.bufPtr = 0
 }
 
 func (s *state) Size() int      { return hashByteLen }
