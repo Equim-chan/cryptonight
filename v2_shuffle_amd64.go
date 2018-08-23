@@ -16,5 +16,5 @@ func (cc *cache) v2Shuffle(offset uint64) {
 	}
 }
 
-//go:nosplit
+//go:noescape
 func v2ShuffleAsm(basePtr *uint64, offset uint64)

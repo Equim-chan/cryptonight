@@ -145,20 +145,18 @@ func TestCheckHash(t *testing.T) {
 }
 
 func BenchmarkSum(b *testing.B) {
-	data := []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
+	data, _ := hex.DecodeString("84cef46e501d92b6c76baa3cae99b142b0a2b9f3ada6c7e438be5b069702659b7e596ab33157a8d325ebb39c56e9906c8e68")
 
 	b.Run("v0", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			Sum(data, 0)
 		}
 	})
-
 	b.Run("v1", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			Sum(data, 1)
 		}
 	})
-
 	b.Run("v2", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			Sum(data, 2)
