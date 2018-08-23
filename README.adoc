@@ -21,7 +21,7 @@ Pure Go/ASM implementation of CryptoNight hash function and some of its variant,
 $ go get -u ekyu.moe/cryptonight
 ----
 
-A CLI utility is also available with `go get -u ekyu.moe/cryptonight/cmd/cnhash`.
+A simple CLI utility is also available with `go get -u ekyu.moe/cryptonight/cmd/cnhash`.
 
 [source,plain]
 ----
@@ -69,6 +69,12 @@ func ExampleSum() {
 }
 ----
 
+== Tested architectures
+* amd64 _(w/ AVX, SSE, AES)_
+* amd64 _(w/o AVX, SSE, AES)_
+* 386
+* arm64
+
 == Development
 While this repository is already out-of-box, which means what you need to do to use it in your code is just a `go get` (or `dep ensure -add` whatsoever), in case you want to hack on this library, some additional steps are required since it uses code generation.
 
@@ -96,7 +102,7 @@ $ go test -v -run=^$ -bench=. -benchmem
 
 === TODO
 * [ ] ARM64-specific optimization
-* [ ] Tests on other architectures
+* [x] Tests on other architectures
 * [x] Improve performance for variant 2
 * [ ] Improve performance for groestl and jh
 * [ ] Add tests for internal/aes, internal/sha3, groestl and jh
