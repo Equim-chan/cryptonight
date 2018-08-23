@@ -23,6 +23,26 @@ $ go get -u ekyu.moe/cryptonight
 
 A CLI utility is also available with `go get -u ekyu.moe/cryptonight/cmd/cnhash`.
 
+[source,plain]
+----
+Usage of cnhash:
+  -in-file string
+        Read input from file instead of stdin.
+  -in-hex
+        Read input in hex instead of binary.
+  -include-diff
+        Append the difficulty of the result hash to the output. If -out-binary is not given,
+the difficulty will be appeneded to the output in decimal with comma separated (CSV friendly),
+otherwise it will be appeneded to the hash binary (which is 32 bytes long) directly, in 8 bytes
+little endian.
+  -out-binary
+        Produce output in binary (little endian) instead of hex.
+  -out-file string
+        Produce output to file instead of stdout.
+  -variant int
+        Set CryptoNight variant, default 0.
+----
+
 == Example
 [source,go]
 ----
@@ -65,6 +85,14 @@ Once some modification is made in a file that used macro, simply use `go generat
 ``ekyu.moe/cryptonight/groestl``:: Grøstl-256 implementation. It is directly ported from C and not quite optimized.
 
 ``ekyu.moe/cryptonight/jh``:: JH-256 implementation. It is directly ported from C and not quite optimized.
+
+=== Tests, coverage and benchmarks
+[source,shell]
+----
+$ go test -v -race -coverprofile=coverage.txt -covermode=atomic
+$ go tool cover -html=coverage.txt
+$ go test -v -run=^$ -bench=. -benchmem
+----
 
 === TODO
 * [ ] ARM64-specific optimization
