@@ -9,6 +9,8 @@ package aes // import "ekyu.moe/cryptonight/internal/aes"
 
 // CnExpandKey expands exactly 10 round keys.
 //
+// key must have at least 2 elements.
+//
 // The result may vary from different architecture, but the output parameter
 // rkeys is guranteed to give correct result when used as input in CnRounds.
 //
@@ -20,8 +22,7 @@ func CnExpandKey(key []uint64, rkeys *[40]uint32) {
 
 // CnRounds = (SubBytes, ShiftRows, MixColumns, AddRoundKey) * 10,
 //
-// dst and src must be at least 16 bytes long.
-// rkeys must has at least 40 elements.
+// dst and src must have at least 2 elements.
 //
 // Note that this is CryptoNight specific.
 // This is non-standard AES!
@@ -32,8 +33,7 @@ func CnRounds(dst, src []uint64, rkeys *[40]uint32) {
 // CnSingleRound performs exactly one AES round, i.e.
 // one (SubBytes, ShiftRows, MixColumns, AddRoundKey).
 //
-// dst and src must be at least 16 bytes long.
-// rkeys must has at least 2 elements.
+// dst and src must have at least 2 elements.
 //
 // Note that this is CryptoNight specific.
 // CnSingleRound * 10 might not be equivalent to one CnRounds.
