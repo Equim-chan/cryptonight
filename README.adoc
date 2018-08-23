@@ -105,7 +105,6 @@ $ go test -v -run=^$ -bench=. -benchmem
 * [x] Tests on other architectures
 * [x] Improve performance for variant 2
 * [ ] Improve performance for groestl and jh
-* [ ] Add tests for internal/aes, internal/sha3, groestl and jh
 
 == License
 https://github.com/Equim-chan/cryptonight/blob/master/LICENSE[MIT]

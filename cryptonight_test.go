@@ -3,6 +3,12 @@ package cryptonight
 import (
 	"encoding/hex"
 	"testing"
+
+	"github.com/aead/skein"
+	"github.com/dchest/blake256"
+
+	"ekyu.moe/cryptonight/groestl"
+	"ekyu.moe/cryptonight/jh"
 )
 
 type hashSpec struct {
@@ -180,4 +186,39 @@ func BenchmarkCheckHash(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		CheckHash(in, 54164528257)
 	}
+}
+
+func BenchmarkFinalHash(b *testing.B) {
+	// exactly 200 bytes
+	in, _ := hex.DecodeString("54aed57f88c00ccd0ed596ea7a119eab614e4a618d6777e3a7e61b8eb5c10373cf01826848e5036f6a03d4b37f0952679559dd7badfe91aa53edf7a029a4f5ecdd77ca2522357401749d20e53f89251a1e1e617851c1862c1e6008d3874368b07ea6ac411031a2fb95536c6bf5e1d7c991418b5ed4c3174212637249410213fb8cf06be61b77644b9b46d005287b0c6513cf67450b5a924ac69d0cb68680022a394fbc4d5a92d91aba9bc32f54b5a1d176337f167986bc9c04b54ce6a5b81420c0ee28031e731981")
+	b.ResetTimer()
+
+	b.Run("BLAKE-256", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			h := blake256.New()
+			h.Write(in)
+			_ = h.Sum(nil)
+		}
+	})
+	b.Run("Groestl-256", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			h := groestl.New256()
+			h.Write(in)
+			_ = h.Sum(nil)
+		}
+	})
+	b.Run("JH-256", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			h := jh.New256()
+			h.Write(in)
+			_ = h.Sum(nil)
+		}
+	})
+	b.Run("Skein-256", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			h := skein.New256(nil)
+			h.Write(in)
+			_ = h.Sum(nil)
+		}
+	})
 }
