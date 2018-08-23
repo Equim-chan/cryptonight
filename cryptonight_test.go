@@ -151,6 +151,8 @@ func TestCheckHash(t *testing.T) {
 }
 
 func BenchmarkSum(b *testing.B) {
+	// the data is special, when run into all v0, v1, v2 proccess, the final hash
+	// function is the same (blake-256), so that it can just be a bit more fair.
 	data, _ := hex.DecodeString("84cef46e501d92b6c76baa3cae99b142b0a2b9f3ada6c7e438be5b069702659b7e596ab33157a8d325ebb39c56e9906c8e68")
 
 	b.Run("v0", func(b *testing.B) {
@@ -197,28 +199,28 @@ func BenchmarkFinalHash(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			h := blake256.New()
 			h.Write(in)
-			_ = h.Sum(nil)
+			h.Sum(nil)
 		}
 	})
 	b.Run("Groestl-256", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			h := groestl.New256()
 			h.Write(in)
-			_ = h.Sum(nil)
+			h.Sum(nil)
 		}
 	})
 	b.Run("JH-256", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			h := jh.New256()
 			h.Write(in)
-			_ = h.Sum(nil)
+			h.Sum(nil)
 		}
 	})
 	b.Run("Skein-256", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			h := skein.New256(nil)
 			h.Write(in)
-			_ = h.Sum(nil)
+			h.Sum(nil)
 		}
 	})
 }
