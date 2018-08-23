@@ -70,6 +70,8 @@ Once some modification is made in a file that used macro, simply use `go generat
 * [ ] ARM64-specific optimization
 * [ ] Tests on other architectures
 * [x] Improve performance for variant 2
+* [ ] Improve performance for groestl and jh
+* [ ] Add tests for internal/aes, internal/sha3, groestl and jh
 
 == License
 https://github.com/Equim-chan/cryptonight/blob/master/LICENSE[MIT]

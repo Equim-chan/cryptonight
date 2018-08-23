@@ -1,6 +1,3 @@
-// HEAD_PLACEHOLDER
-// +build ignore
-
 // Package cryptonight implements CryptoNight hash function and some of its
 // variant. Original CryptoNight algorithm is defined in CNS008 at
 // https://cryptonote.org/cns/cns008.txt
@@ -15,26 +12,6 @@ import (
 	"ekyu.moe/cryptonight/internal/aes"
 	"ekyu.moe/cryptonight/internal/sha3"
 )
-
-// This field is for macro definitions.
-// We define it in a literal string so that it can trick gofmt(1).
-//
-// It should be empty after they are expanded by cpp(1).
-const _ = `
-#undef build
-#undef ignore
-
-#define U64_U8(a, begin, end) \
-    ( (*[( (end) - (begin) ) * 8 ]uint8)(unsafe.Pointer(&a[ (begin) ])) )
-
-#define U64_U32(a, begin, end) \
-    ( (*[( (end) - (begin) ) * 2 ]uint32)(unsafe.Pointer(&a[ (begin) ])) )
-
-#define TO_ADDR(a) (( (a[0]) & 0x1ffff0) >> 3)
-`
-
-// To trick goimports(1).
-var _ = unsafe.Pointer(nil)
 
 // Sum calculate a CryptoNight hash digest. The return value is exactly 32 bytes
 // long.
@@ -51,6 +28,15 @@ func Sum(data []byte, variant int) []byte {
 }
 
 type cache struct {
+	// DO NOT change the order of these fields in this struct!
+	// They are carefully placed in this order to keep at least 64-bit aligned
+	// for some fields.
+	// In variant 2 which uses AVX for amd64, the scratchpad requires 128-bit
+	// align to operate.
+	//
+	// In the future the alignment may be set explicitly, see
+	// https://github.com/golang/go/issues/19057
+
 	scratchpad [2 * 1024 * 1024 / 8]uint64 // 2 MiB scratchpad for memhard loop
 	finalState [25]uint64                  // state of keccak1600
 
@@ -103,8 +89,8 @@ func (cc *cache) Sum(data []byte, variant int) []byte {
 	b[0] = cc.finalState[2] ^ cc.finalState[6]
 	b[1] = cc.finalState[3] ^ cc.finalState[7]
 	for i := 0; i < 524288; i++ {
-		addr = TO_ADDR(a)
-		aes.CnSingleRound(c[:], cc.scratchpad[addr:], U64_U32(a, 0, 2))
+		addr = ((a[0]) & 0x1ffff0) >> 3
+		aes.CnSingleRound(c[:], cc.scratchpad[addr:], &a)
 
 		if variant == 2 {
 			cc.v2Shuffle(addr)
@@ -121,7 +107,7 @@ func (cc *cache) Sum(data []byte, variant int) []byte {
 			cc.scratchpad[addr+1] ^= t << 24
 		}
 
-		addr = TO_ADDR(b)
+		addr = ((b[0]) & 0x1ffff0) >> 3
 		c[0] = cc.scratchpad[addr]
 		c[1] = cc.scratchpad[addr+1]
 
@@ -167,9 +153,10 @@ func (cc *cache) Sum(data []byte, variant int) []byte {
 	copy(cc.finalState[8:24], cc.blocks)
 	sha3.Keccak1600Permute(&cc.finalState)
 
+	// the final hash
 	hp := hashPool[cc.finalState[0]&0x03]
 	h := hp.Get().(hash.Hash)
-	h.Write(U64_U8(cc.finalState, 0, 25)[:])
+	h.Write((*[200]byte)(unsafe.Pointer(&cc.finalState[0]))[:])
 	sum := h.Sum(nil)
 	h.Reset()
 	hp.Put(h)

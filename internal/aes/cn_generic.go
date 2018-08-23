@@ -46,16 +46,17 @@ func cnRoundsGo(dst, src []uint64, rkeys *[40]uint32) {
 	dst8[12], dst8[13], dst8[14], dst8[15] = byte(s3>>24), byte(s3>>16), byte(s3>>8), byte(s3)
 }
 
-func cnSingleRoundGo(dst, src []uint64, rkey *[4]uint32) {
+func cnSingleRoundGo(dst, src []uint64, rkey *[2]uint64) {
 	src8 := (*[16]byte)(unsafe.Pointer(&src[0]))
 	dst8 := (*[16]byte)(unsafe.Pointer(&dst[0]))
+	rkey32 := (*[4]uint32)(unsafe.Pointer(&rkey[0]))
 
 	var t0, t1, t2, t3 uint32
 
-	t0 = rkey[0] ^ ter0[src8[0]] ^ ter1[src8[5]] ^ ter2[src8[10]] ^ ter3[src8[15]]
-	t1 = rkey[1] ^ ter0[src8[4]] ^ ter1[src8[9]] ^ ter2[src8[14]] ^ ter3[src8[3]]
-	t2 = rkey[2] ^ ter0[src8[8]] ^ ter1[src8[13]] ^ ter2[src8[2]] ^ ter3[src8[7]]
-	t3 = rkey[3] ^ ter0[src8[12]] ^ ter1[src8[1]] ^ ter2[src8[6]] ^ ter3[src8[11]]
+	t0 = rkey32[0] ^ ter0[src8[0]] ^ ter1[src8[5]] ^ ter2[src8[10]] ^ ter3[src8[15]]
+	t1 = rkey32[1] ^ ter0[src8[4]] ^ ter1[src8[9]] ^ ter2[src8[14]] ^ ter3[src8[3]]
+	t2 = rkey32[2] ^ ter0[src8[8]] ^ ter1[src8[13]] ^ ter2[src8[2]] ^ ter3[src8[7]]
+	t3 = rkey32[3] ^ ter0[src8[12]] ^ ter1[src8[1]] ^ ter2[src8[6]] ^ ter3[src8[11]]
 
 	dst8[0], dst8[1], dst8[2], dst8[3] = byte(t0), byte(t0>>8), byte(t0>>16), byte(t0>>24)
 	dst8[4], dst8[5], dst8[6], dst8[7] = byte(t1), byte(t1>>8), byte(t1>>16), byte(t1>>24)

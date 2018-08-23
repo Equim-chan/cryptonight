@@ -33,10 +33,10 @@ func CnRounds(dst, src []uint64, rkeys *[40]uint32) {
 // one (SubBytes, ShiftRows, MixColumns, AddRoundKey).
 //
 // dst and src must be at least 16 bytes long.
-// rkeys must has at least 40 elements.
+// rkeys must has at least 2 elements.
 //
 // Note that this is CryptoNight specific.
 // CnSingleRound * 10 might not be equivalent to one CnRounds.
-func CnSingleRound(dst, src []uint64, rkey *[4]uint32) {
+func CnSingleRound(dst, src []uint64, rkey *[2]uint64) {
 	cnSingleRound(dst, src, rkey)
 }

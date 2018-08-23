@@ -29,7 +29,7 @@ TEXT ·cnRoundsAsm(SB), NOSPLIT, $0
     MOVUPS X0, 0(AX)
     RET
 
-// func cnSingleRoundAsm(dst, src *uint64, rkey *uint32)
+// func cnSingleRoundAsm(dst, src *uint64, rkey *uint64)
 TEXT ·cnSingleRoundAsm(SB), NOSPLIT, $0
     MOVQ dst+0(FP), AX
     MOVQ src+8(FP), BX

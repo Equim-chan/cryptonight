@@ -24,7 +24,7 @@ func cnRounds(dst, src []uint64, rkeys *[40]uint32) {
 	}
 }
 
-func cnSingleRound(dst, src []uint64, rkey *[4]uint32) {
+func cnSingleRound(dst, src []uint64, rkey *[2]uint64) {
 	if !hasAES {
 		cnSingleRoundGo(dst, src, rkey)
 	} else {
@@ -33,10 +33,10 @@ func cnSingleRound(dst, src []uint64, rkey *[4]uint32) {
 }
 
 //go:noescape
+func cnExpandKeyAsm(src *uint64, rkey *uint32)
+
+//go:noescape
 func cnRoundsAsm(dst, src *uint64, rkeys *uint32)
 
 //go:noescape
-func cnSingleRoundAsm(dst, src *uint64, rkey *uint32)
-
-//go:noescape
-func cnExpandKeyAsm(src *uint64, rkey *uint32)
+func cnSingleRoundAsm(dst, src *uint64, rkey *uint64)
