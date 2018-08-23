@@ -21,7 +21,7 @@ var (
 	}
 
 	// hashPool is for final hashes
-	hashPool = [...]*sync.Pool{
+	hashPool = [...]sync.Pool{
 		{New: func() interface{} { return blake256.New() }},
 		{New: func() interface{} { return groestl.New256() }},
 		{New: func() interface{} { return jh.New256() }},

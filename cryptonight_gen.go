@@ -10,7 +10,6 @@ import (
 	"encoding/binary"
 	"hash"
 	"math"
-	"runtime"
 	"unsafe"
 
 	"ekyu.moe/cryptonight/internal/aes"
@@ -127,7 +126,7 @@ func (cc *cache) Sum(data []byte, variant int) []byte {
 			sqrtResult = uint64(math.Sqrt(float64((b[0] + divisionResult) >> 16)))
 		}
 
-		/// byteAdd and byteMul
+		// byteAdd and byteMul
 		byteAddMul(&a, b[0], c[0])
 
 		if variant == 2 {
@@ -159,16 +158,13 @@ func (cc *cache) Sum(data []byte, variant int) []byte {
 	}
 
 	copy(cc.finalState[8:24], cc.blocks)
-
-	// This KeepAlive is a must, as we hacked too much for memory.
-	runtime.KeepAlive(cc.finalState)
 	sha3.Keccak1600Permute(&cc.finalState)
 
 	hp := hashPool[cc.finalState[0]&0x03]
 	h := hp.Get().(hash.Hash)
-	h.Reset()
 	h.Write(((*[((25) - (0)) * 8]uint8)(unsafe.Pointer(&cc.finalState[(0)])))[:])
 	sum := h.Sum(nil)
+	h.Reset()
 	hp.Put(h)
 
 	return sum

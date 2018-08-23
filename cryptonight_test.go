@@ -65,8 +65,8 @@ var (
 		{"8e3c1865f22801dc3df0a688da80701e2390e7838e65c142604cc00eafe34000", 1009},
 
 		{"d3c693d2083888c03bc8dfbca4f32d9692e094722d8cbf4a90aa4c1400000000", 54164528257},
-		// {"0000000000000000000000000000000000000000000000000000000000000000", 0},
-		// {"0000000000000000000000000000000000000000000000000000000000000001", 256},
+		{"0000000000000000000000000000000000000000000000000000000000000000", 0},
+		{"0000000000000000000000000000000000000000000000000000000000000001", 256},
 		{"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0", 1},
 		{"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 1},
 	}
@@ -107,16 +107,6 @@ func TestDifficulty(t *testing.T) {
 		if diff != v.output {
 			t.Errorf("\n[%d] expected:\n\t%v\ngot:\n\t%v\n", i, v.output, diff)
 		}
-
-		if !CheckHash(in, v.output-1) {
-			t.Errorf("\n[%d] check hash goes wrong", i)
-		}
-		if !CheckHash(in, v.output) {
-			t.Errorf("\n[%d] check hash goes wrong", i)
-		}
-		if CheckHash(in, v.output+1) {
-			t.Errorf("\n[%d] check hash goes wrong", i)
-		}
 	}
 
 	func() {
@@ -137,6 +127,21 @@ func TestDifficulty(t *testing.T) {
 
 		CheckHash([]byte("Obviously less than 32 bytes"), 100)
 	}()
+}
+
+func TestCheckHash(t *testing.T) {
+	for i, v := range diffSpecs[:2] {
+		in, _ := hex.DecodeString(v.input)
+		if !CheckHash(in, v.output-1) {
+			t.Errorf("\n[%d] check hash goes wrong", i)
+		}
+		if !CheckHash(in, v.output) {
+			t.Errorf("\n[%d] check hash goes wrong", i)
+		}
+		if CheckHash(in, v.output+1) {
+			t.Errorf("\n[%d] check hash goes wrong", i)
+		}
+	}
 }
 
 func BenchmarkSum(b *testing.B) {
