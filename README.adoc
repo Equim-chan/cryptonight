@@ -13,7 +13,7 @@ Pure Go/ASM implementation of CryptoNight hash function and some of its variant,
 * Support Monero v7 variant, and also the upcoming https://github.com/monero-project/monero/pull/4218/[variant 2]!
 * No CGO hell, making builds easier and faster.
 * Hardware acceleration available for amd64 architecture.
-* Basic https://godoc.org/ekyu.moe/cryptonight#Cache[cache] support, since it is memory hard.
+* Use of an internal sync.Pool to manage caches, since it is memory hard.
 
 == Install
 [source,shell]
