@@ -20,9 +20,9 @@ import (
 // This is assumed and not checked by Sum. If this condition doesn't meet, Sum
 // will panic straightforward.
 func Sum(data []byte, variant int) []byte {
-	cache := cachePool.Get().(*cache)
-	sum := cache.sum(data, variant)
-	cachePool.Put(cache)
+	cc := cachePool.Get().(*cc)
+	sum := cc.sum(data, variant)
+	cachePool.Put(cc)
 
 	return sum
 }
@@ -62,8 +62,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 	)
 
 	// scratchpad init
-	key := cc.finalState[:4]
-	aes.CnExpandKey(key, &cc.rkeys)
+	aes.CnExpandKey(cc.finalState[:4], &cc.rkeys)
 	copy(cc.blocks[:], cc.finalState[8:24])
 
 	for i := 0; i < 2*1024*1024/8; i += 16 {
@@ -131,9 +130,8 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 	}
 
 	// as per CNS008 sec.5 Result Calculation
-	key = cc.finalState[4:8]
-	aes.CnExpandKey(key, &cc.rkeys)
-	tmp := cc.finalState[8:24]
+	aes.CnExpandKey(cc.finalState[4:8], &cc.rkeys)
+	tmp := cc.finalState[8:24] // a temp pointer
 
 	for i := 0; i < 2*1024*1024/8; i += 16 {
 		for j := 0; j < 16; j += 2 {
