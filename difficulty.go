@@ -14,7 +14,10 @@ var (
 // Difficulty returns hash's difficulty. hash must be at least 32 bytes long,
 // otherwise it will panic straightforward.
 //
-// Difficulty is slower than CheckHash.
+// Difficulty is slower than CheckHash, so it should only be used when necessary.
+//
+// This isn't a part of CryptoNight, but since such demand of checking difficulty
+// is too common, it is thus included in this package.
 func Difficulty(hash []byte) uint64 {
 	// swap byte order, since SetBytes accepts big instead of little endian
 	buf := make([]byte, 32)
@@ -30,7 +33,7 @@ func Difficulty(hash []byte) uint64 {
 	return hashBig.Div(oneLsh256, hashBig).Uint64()
 }
 
-// CheckHash checks hash's difficulty agains diff. It returns true if hash's
+// CheckHash checks hash's difficulty against diff. It returns true if hash's
 // difficulty is equal to or greater than diff. hash must be at least 32 bytes
 // long, otherwise it will panic straightforward.
 //
@@ -40,6 +43,9 @@ func Difficulty(hash []byte) uint64 {
 // calculating the exact value of hashDiff.
 //
 // This function is a port of monero: src/cryptonote_basic/difficulty.cpp:check_hash
+//
+// This isn't a part of CryptoNight, but since such demand of checking difficulty
+// is too common, it is thus included in this package.
 func CheckHash(hash []byte, diff uint64) bool {
 	var low, high, top, cur, word uint64
 

@@ -20,7 +20,7 @@ import (
 // This is assumed and not checked by Sum. If this condition doesn't meet, Sum
 // will panic straightforward.
 func Sum(data []byte, variant int) []byte {
-	cc := cachePool.Get().(*cc)
+	cc := cachePool.Get().(*cache)
 	sum := cc.sum(data, variant)
 	cachePool.Put(cc)
 

@@ -1,6 +1,7 @@
 package cryptonight
 
 import (
+	"encoding/hex"
 	"fmt"
 )
 
@@ -17,4 +18,16 @@ func ExampleSum() {
 	// 0999794e4e20d86e6a81b54495aeb370b6a9ae795fb5af4f778afaf07c0b2e0e
 	// 261124c5a6dca5d4aa3667d328a94ead9a819ae714e1f1dc113ceeb14f1ecf99
 	// 5fedb55ec287cc6b508b1a2058ea62011ef054c46ef02bae4d148488dc72f3db
+}
+
+func ExampleCheckHash() {
+	hash, _ := hex.DecodeString("8e3c1865f22801dc3df0a688da80701e2390e7838e65c142604cc00eafe34000")
+	fmt.Println("Hash difficulty greater than 1000:", CheckHash(hash, 1000))
+	fmt.Println("Hash difficulty greater than 2000:", CheckHash(hash, 2000))
+	// not necessary to use if you only want to compare
+	fmt.Println("Hash difficulty precise value:", Difficulty(hash))
+	// Output:
+	// Hash difficulty greater than 1000: true
+	// Hash difficulty greater than 2000: false
+	// Hash difficulty precise value: 1009
 }
