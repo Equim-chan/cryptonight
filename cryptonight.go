@@ -21,7 +21,7 @@ import (
 // will panic straightforward.
 func Sum(data []byte, variant int) []byte {
 	cache := cachePool.Get().(*cache)
-	sum := cache.Sum(data, variant)
+	sum := cache.sum(data, variant)
 	cachePool.Put(cache)
 
 	return sum
@@ -40,17 +40,11 @@ type cache struct {
 	scratchpad [2 * 1024 * 1024 / 8]uint64 // 2 MiB scratchpad for memhard loop
 	finalState [25]uint64                  // state of keccak1600
 
-	blocks []uint64   // temporary chunk/pointer of data
+	blocks [16]uint64 // temporary chunk/pointer of data
 	rkeys  [40]uint32 // 10 rounds, instead of 14 as in standard AES-256
 }
 
-// Sum calculate a CryptoNight hash digest. The return value is exactly 32 bytes
-// long.
-//
-// When variant is 1, data is required to have at least 43 bytes.
-// This is assumed and not checked by Sum. If this condition doesn't meet, Sum
-// will panic straightforward.
-func (cc *cache) Sum(data []byte, variant int) []byte {
+func (cc *cache) sum(data []byte, variant int) []byte {
 	// as per CNS008 sec.3 Scratchpad Initialization
 	sha3.Keccak1600State(&cc.finalState, data)
 
@@ -70,13 +64,13 @@ func (cc *cache) Sum(data []byte, variant int) []byte {
 	// scratchpad init
 	key := cc.finalState[:4]
 	aes.CnExpandKey(key, &cc.rkeys)
-	copy(cc.blocks, cc.finalState[8:24])
+	copy(cc.blocks[:], cc.finalState[8:24])
 
 	for i := 0; i < 2*1024*1024/8; i += 16 {
 		for j := 0; j < 16; j += 2 {
 			aes.CnRounds(cc.blocks[j:], cc.blocks[j:], &cc.rkeys)
 		}
-		copy(cc.scratchpad[i:], cc.blocks)
+		copy(cc.scratchpad[i:], cc.blocks[:])
 	}
 
 	// as per CNS008 sec.4 Memory-Hard Loop
@@ -139,18 +133,18 @@ func (cc *cache) Sum(data []byte, variant int) []byte {
 	// as per CNS008 sec.5 Result Calculation
 	key = cc.finalState[4:8]
 	aes.CnExpandKey(key, &cc.rkeys)
-	cc.blocks = cc.finalState[8:24]
+	tmp := cc.finalState[8:24]
 
 	for i := 0; i < 2*1024*1024/8; i += 16 {
 		for j := 0; j < 16; j += 2 {
-			cc.scratchpad[i+j] ^= cc.blocks[j]
-			cc.scratchpad[i+j+1] ^= cc.blocks[j+1]
+			cc.scratchpad[i+j] ^= tmp[j]
+			cc.scratchpad[i+j+1] ^= tmp[j+1]
 			aes.CnRounds(cc.scratchpad[i+j:], cc.scratchpad[i+j:], &cc.rkeys)
 		}
-		cc.blocks = cc.scratchpad[i : i+16]
+		tmp = cc.scratchpad[i : i+16]
 	}
 
-	copy(cc.finalState[8:24], cc.blocks)
+	copy(cc.finalState[8:24], tmp)
 	sha3.Keccak1600Permute(&cc.finalState)
 
 	// the final hash

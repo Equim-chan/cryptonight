@@ -14,9 +14,7 @@ var (
 	// cachePool is a pool of cache.
 	cachePool = sync.Pool{
 		New: func() interface{} {
-			return &cache{
-				blocks: make([]uint64, 16),
-			}
+			return new(cache)
 		},
 	}
 

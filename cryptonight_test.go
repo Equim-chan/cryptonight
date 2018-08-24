@@ -97,17 +97,17 @@ func BenchmarkSum(b *testing.B) {
 
 	b.Run("v0", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			Sum(data, 0)
+			new(cache).sum(data, 0)
 		}
 	})
 	b.Run("v1", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			Sum(data, 1)
+			new(cache).sum(data, 1)
 		}
 	})
 	b.Run("v2", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			Sum(data, 2)
+			new(cache).sum(data, 2)
 		}
 	})
 }
