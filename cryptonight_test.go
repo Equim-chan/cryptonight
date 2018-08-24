@@ -16,11 +16,6 @@ type hashSpec struct {
 	variant       int
 }
 
-type diffSpec struct {
-	input  string // in hex
-	output uint64
-}
-
 var (
 	hashSpecsV0 = []hashSpec{
 		// From CNS008
@@ -65,17 +60,6 @@ var (
 		{"4578636570746575722073696e74206f6363616563617420637570696461746174206e6f6e2070726f6964656e742c", "88536691d2d8eb6c8dfbb2597ab50fbbd9f8c2834281e1bb70616f48094d68c8", 2},
 		{"73756e7420696e2063756c706120717569206f666669636961206465736572756e74206d6f6c6c697420616e696d20696420657374206c61626f72756d2e", "5964da99f4a273393e464f40070122f045eecfed1309ac25dd322e1fb052dc45", 2},
 	}
-
-	diffSpecs = []diffSpec{
-		// From monero-stratum: util/util_test.go
-		{"8e3c1865f22801dc3df0a688da80701e2390e7838e65c142604cc00eafe34000", 1009},
-
-		{"d3c693d2083888c03bc8dfbca4f32d9692e094722d8cbf4a90aa4c1400000000", 54164528257},
-		{"0000000000000000000000000000000000000000000000000000000000000000", 0},
-		{"0000000000000000000000000000000000000000000000000000000000000001", 256},
-		{"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0", 1},
-		{"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 1},
-	}
 )
 
 func run(t *testing.T, hashSpecs []hashSpec) {
@@ -106,50 +90,6 @@ func TestSum(t *testing.T) {
 	t.Run("v2", func(t *testing.T) { run(t, hashSpecsV2) })
 }
 
-func TestDifficulty(t *testing.T) {
-	for i, v := range diffSpecs {
-		in, _ := hex.DecodeString(v.input)
-		diff := Difficulty(in)
-		if diff != v.output {
-			t.Errorf("\n[%d] expected:\n\t%v\ngot:\n\t%v\n", i, v.output, diff)
-		}
-	}
-
-	func() {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected to panic, got nothing.")
-			}
-		}()
-
-		Difficulty([]byte("Obviously less than 32 bytes"))
-	}()
-	func() {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected to panic, got nothing.")
-			}
-		}()
-
-		CheckHash([]byte("Obviously less than 32 bytes"), 100)
-	}()
-}
-
-func TestCheckHash(t *testing.T) {
-	for i, v := range diffSpecs[:2] {
-		in, _ := hex.DecodeString(v.input)
-		if !CheckHash(in, v.output-1) {
-			t.Errorf("\n[%d] check hash goes wrong", i)
-		}
-		if !CheckHash(in, v.output) {
-			t.Errorf("\n[%d] check hash goes wrong", i)
-		}
-		if CheckHash(in, v.output+1) {
-			t.Errorf("\n[%d] check hash goes wrong", i)
-		}
-	}
-}
-
 func BenchmarkSum(b *testing.B) {
 	// the data is special, when run into all v0, v1, v2 proccess, the final hash
 	// function is the same (blake-256), so that it can just be a bit more fair.
@@ -170,24 +110,6 @@ func BenchmarkSum(b *testing.B) {
 			Sum(data, 2)
 		}
 	})
-}
-
-func BenchmarkDifficulty(b *testing.B) {
-	in, _ := hex.DecodeString("d3c693d2083888c03bc8dfbca4f32d9692e094722d8cbf4a90aa4c1400000000")
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		Difficulty(in)
-	}
-}
-
-func BenchmarkCheckHash(b *testing.B) {
-	in, _ := hex.DecodeString("d3c693d2083888c03bc8dfbca4f32d9692e094722d8cbf4a90aa4c1400000000")
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		CheckHash(in, 54164528257)
-	}
 }
 
 func BenchmarkFinalHash(b *testing.B) {
