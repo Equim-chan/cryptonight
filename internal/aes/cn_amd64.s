@@ -35,7 +35,8 @@ TEXT ·cnSingleRoundAsm(SB), NOSPLIT, $0
     MOVQ src+8(FP), BX
     MOVQ rkey+16(FP), CX
     MOVUPS 0(BX), X0
-    AESENC 0(CX), X0
+    MOVUPS 0(CX), X1
+    AESENC X1, X0
     MOVUPS X0, 0(AX)
     RET
 
