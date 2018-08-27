@@ -25,4 +25,4 @@ jobs:
           name: benchmark
           command: |
             sed -nr '/model name/ s/.*:\s*(.*) @ .*/\1/p' /proc/cpuinfo;
-            go test -v -bench=. -benchmem
+            go test -v -run=^$ -bench=. -benchmem
