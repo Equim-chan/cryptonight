@@ -31,8 +31,6 @@ type cache struct {
 	// DO NOT change the order of these fields in this struct!
 	// They are carefully placed in this order to keep at least 64-bit aligned
 	// for some fields.
-	// In variant 2 which uses AVX for amd64, the scratchpad requires 128-bit
-	// align to operate.
 	//
 	// In the future the alignment may be set explicitly, see
 	// https://github.com/golang/go/issues/19057
@@ -45,21 +43,34 @@ type cache struct {
 }
 
 func (cc *cache) sum(data []byte, variant int) []byte {
+	//////////////////////////////////////////////////
+	// these variables never escape to heap
+	var (
+		// used in memory hard
+		addr    uint64
+		a, c, d [2]uint64
+		b       [4]uint64 // variant 2 needs [4]uint64
+
+		// for variant 1
+		v1Tweak, v1Tmp uint64
+
+		// for variant 2
+		offset0, offset1, offset2 uint64
+		tmpChunk                  [2]uint64
+		dividend, divisor         uint64
+		divisionResult            uint64
+		sqrtInput, sqrtResult     uint64
+		v2S, v2B, v2R             uint64
+	)
+
+	//////////////////////////////////////////////////
 	// as per CNS008 sec.3 Scratchpad Initialization
 	sha3.Keccak1600State(&cc.finalState, data)
 
-	// for variant 1
-	var tweak, t uint64
 	if variant == 1 {
 		// that's why data must have more than 43 bytes
-		tweak = cc.finalState[24] ^ binary.LittleEndian.Uint64(data[35:43])
+		v1Tweak = cc.finalState[24] ^ binary.LittleEndian.Uint64(data[35:43])
 	}
-
-	// for variant 2
-	var (
-		divisionResult, sqrtResult uint64
-		dividend, divisor          uint64
-	)
 
 	// scratchpad init
 	aes.CnExpandKey(cc.finalState[:4], &cc.rkeys)
@@ -72,61 +83,119 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		copy(cc.scratchpad[i:], cc.blocks[:])
 	}
 
+	//////////////////////////////////////////////////
 	// as per CNS008 sec.4 Memory-Hard Loop
-	var (
-		a, b, c [2]uint64
-		addr    uint64 // address index
-	)
 	a[0] = cc.finalState[0] ^ cc.finalState[4]
 	a[1] = cc.finalState[1] ^ cc.finalState[5]
 	b[0] = cc.finalState[2] ^ cc.finalState[6]
 	b[1] = cc.finalState[3] ^ cc.finalState[7]
+	if variant == 2 {
+		b[2] = cc.finalState[8] ^ cc.finalState[10]
+		b[3] = cc.finalState[9] ^ cc.finalState[11]
+		divisionResult = cc.finalState[12]
+		sqrtResult = cc.finalState[13]
+	}
+
 	for i := 0; i < 524288; i++ {
 		addr = ((a[0]) & 0x1ffff0) >> 3
 		aes.CnSingleRound(c[:], cc.scratchpad[addr:], &a)
 
 		if variant == 2 {
-			cc.v2Shuffle(addr)
+			// since we use []uint64 instead of []uint8 as scratchpad, the offset applies too
+			offset0 = addr ^ 0x02
+			offset1 = addr ^ 0x04
+			offset2 = addr ^ 0x06
+
+			tmpChunk[0] = cc.scratchpad[offset0]
+			tmpChunk[1] = cc.scratchpad[offset0+1]
+
+			cc.scratchpad[offset0] = cc.scratchpad[offset2] + b[2]
+			cc.scratchpad[offset0+1] = cc.scratchpad[offset2+1] + b[3]
+
+			cc.scratchpad[offset2] = cc.scratchpad[offset1] + a[0]
+			cc.scratchpad[offset2+1] = cc.scratchpad[offset1+1] + a[1]
+
+			cc.scratchpad[offset1] = tmpChunk[0] + b[0]
+			cc.scratchpad[offset1+1] = tmpChunk[1] + b[1]
 		}
 
 		cc.scratchpad[addr] = b[0] ^ c[0]
 		cc.scratchpad[addr+1] = b[1] ^ c[1]
-		b[0] = c[0]
-		b[1] = c[1]
 
 		if variant == 1 {
-			t = cc.scratchpad[addr+1] >> 24
-			t = ((^t)&1)<<4 | (((^t)&1)<<4&t)<<1 | (t&32)>>1
-			cc.scratchpad[addr+1] ^= t << 24
+			v1Tmp = cc.scratchpad[addr+1] >> 24
+			v1Tmp = ((^v1Tmp)&1)<<4 | (((^v1Tmp)&1)<<4&v1Tmp)<<1 | (v1Tmp&32)>>1
+			cc.scratchpad[addr+1] ^= v1Tmp << 24
 		}
 
-		addr = ((b[0]) & 0x1ffff0) >> 3
-		c[0] = cc.scratchpad[addr]
-		c[1] = cc.scratchpad[addr+1]
+		addr = ((c[0]) & 0x1ffff0) >> 3
+		d[0] = cc.scratchpad[addr]
+		d[1] = cc.scratchpad[addr+1]
 
 		if variant == 2 {
-			c[1] ^= divisionResult ^ sqrtResult
-			dividend = b[1]
-			divisor = b[0]&0xffffffff | 0x80000001
-			divisionResult = (dividend/divisor)&0xffffffff | ((dividend % divisor) << 32)
-			sqrtResult = uint64(math.Sqrt(float64((b[0] + divisionResult) >> 16)))
+			// equivalent to VARIANT2_PORTABLE_INTEGER_MATH in slow-hash.c
+			// VARIANT2_INTEGER_MATH_DIVISION_STEP
+			d[0] ^= divisionResult ^ (sqrtResult << 32)
+			dividend = c[1]
+			divisor = (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
+			divisionResult = (dividend/divisor)&0xffffffff + ((dividend % divisor) << 32)
+			sqrtInput = c[0] + divisionResult
+
+			// VARIANT2_INTEGER_MATH_SQRT_STEP_FP64
+			sqrtResult = uint64(
+				math.Sqrt(
+					float64(sqrtInput)+1<<64,
+				)*2 - 1<<33,
+			)
+
+			// VARIANT2_INTEGER_MATH_SQRT_FIXUP
+			v2S = sqrtResult >> 1
+			v2B = sqrtResult & 1
+			v2R = v2S*(v2S+v2B) + (sqrtResult << 32) - sqrtInput
+			if int64(v2R+v2B) > 0 {
+				sqrtResult--
+			}
+			if int64(v2R+v2S+(1<<32)) < 0 {
+				sqrtResult++
+			}
+
+			// shuffle again, it's the same process as above
+			offset0 = addr ^ 0x02
+			offset1 = addr ^ 0x04
+			offset2 = addr ^ 0x06
+
+			tmpChunk[0] = cc.scratchpad[offset0]
+			tmpChunk[1] = cc.scratchpad[offset0+1]
+
+			cc.scratchpad[offset0] = cc.scratchpad[offset2] + b[2]
+			cc.scratchpad[offset0+1] = cc.scratchpad[offset2+1] + b[3]
+
+			cc.scratchpad[offset2] = cc.scratchpad[offset1] + a[0]
+			cc.scratchpad[offset2+1] = cc.scratchpad[offset1+1] + a[1]
+
+			cc.scratchpad[offset1] = tmpChunk[0] + b[0]
+			cc.scratchpad[offset1+1] = tmpChunk[1] + b[1]
+
+			// re-asign higher-order of  b
+			b[2] = b[0]
+			b[3] = b[1]
 		}
 
-		// byteAdd and byteMul
-		byteAddMul(&a, b[0], c[0])
-
-		if variant == 2 {
-			cc.v2Shuffle(addr)
-		}
+		// byteAdd and byteMul altogether
+		byteAddMul(&a, c[0], d[0])
 
 		cc.scratchpad[addr] = a[0]
 		cc.scratchpad[addr+1] = a[1]
-		a[0] ^= c[0]
-		a[1] ^= c[1]
 
 		if variant == 1 {
-			cc.scratchpad[addr+1] ^= tweak
+			cc.scratchpad[addr+1] ^= v1Tweak
 		}
+
+		a[0] ^= d[0]
+		a[1] ^= d[1]
+
+		b[0] = c[0]
+		b[1] = c[1]
 	}
 
 	// as per CNS008 sec.5 Result Calculation
