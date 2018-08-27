@@ -6,7 +6,6 @@ package cryptonight // import "ekyu.moe/cryptonight"
 import (
 	"encoding/binary"
 	"hash"
-	"math"
 	"unsafe"
 
 	"ekyu.moe/cryptonight/internal/aes"
@@ -60,7 +59,6 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		dividend, divisor         uint64
 		divisionResult            uint64
 		sqrtInput, sqrtResult     uint64
-		v2S, v2B, v2R             uint64
 	)
 
 	//////////////////////////////////////////////////
@@ -141,23 +139,9 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			divisionResult = (dividend/divisor)&0xffffffff + ((dividend % divisor) << 32)
 			sqrtInput = c[0] + divisionResult
 
-			// VARIANT2_INTEGER_MATH_SQRT_STEP_FP64
-			sqrtResult = uint64(
-				math.Sqrt(
-					float64(sqrtInput)+1<<64,
-				)*2 - 1<<33,
-			)
-
+			// VARIANT2_INTEGER_MATH_SQRT_STEP_FP64 and
 			// VARIANT2_INTEGER_MATH_SQRT_FIXUP
-			v2S = sqrtResult >> 1
-			v2B = sqrtResult & 1
-			v2R = v2S*(v2S+v2B) + (sqrtResult << 32) - sqrtInput
-			if int64(v2R+v2B) > 0 {
-				sqrtResult--
-			}
-			if int64(v2R+v2S+(1<<32)) < 0 {
-				sqrtResult++
-			}
+			sqrtResult = v2Sqrt(sqrtInput)
 
 			// shuffle again, it's the same process as above
 			offset0 = addr ^ 0x02
