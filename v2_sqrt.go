@@ -11,13 +11,13 @@ func v2Sqrt(in uint64) uint64 {
 		)*2 - 1<<33,
 	)
 
-	v2S := out >> 1
-	v2B := out & 1
-	v2R := v2S*(v2S+v2B) + (out << 32) - in
-	if int64(v2R+v2B) > 0 {
+	s := out >> 1
+	b := out & 1
+	r := s*(s+b) + (out << 32) - in
+	if int64(r+b) > 0 {
 		out--
 	}
-	if int64(v2R+v2S+(1<<32)) < 0 {
+	if int64(r+s+(1<<32)) < 0 {
 		out++
 	}
 
