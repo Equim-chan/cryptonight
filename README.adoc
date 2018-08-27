@@ -56,15 +56,15 @@ import (
 
 func ExampleSum() {
     blob := []byte("Hello, 世界")
-    fmt.Printf("%x\n", Sum(blob, 0)) // original
+    fmt.Printf("%x\n", cryptonight.Sum(blob, 0)) // original
     // Output: 0999794e4e20d86e6a81b54495aeb370b6a9ae795fb5af4f778afaf07c0b2e0e
 
     blob = []byte("variant 1 requires at least 43 bytes of input.")
-    fmt.Printf("%x\n", Sum(blob, 1)) // variant 1
+    fmt.Printf("%x\n", cryptonight.Sum(blob, 1)) // variant 1
     // Output: 261124c5a6dca5d4aa3667d328a94ead9a819ae714e1f1dc113ceeb14f1ecf99
 
     blob = []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
-    fmt.Printf("%x\n", Sum(blob, 2)) // variant 2
+    fmt.Printf("%x\n", cryptonight.Sum(blob, 2)) // variant 2
     // Output: c163d3839d69259d59b7f9b9a09dc043c3b11e34986c2a783091dbdcebed19f9
 }
 ----
