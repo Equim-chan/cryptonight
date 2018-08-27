@@ -110,6 +110,50 @@ func BenchmarkSum(b *testing.B) {
 			new(cache).sum(data, 2)
 		}
 	})
+
+	b.Run("v0-parallel", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				new(cache).sum(data, 0)
+			}
+		})
+	})
+	b.Run("v1-parallel", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				new(cache).sum(data, 1)
+			}
+		})
+	})
+	b.Run("v2-parallel", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				new(cache).sum(data, 2)
+			}
+		})
+	})
+
+	b.Run("v0-parallel-cached", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				Sum(data, 0)
+			}
+		})
+	})
+	b.Run("v1-parallel-cached", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				Sum(data, 1)
+			}
+		})
+	})
+	b.Run("v2-parallel-cached", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				Sum(data, 2)
+			}
+		})
+	})
 }
 
 func BenchmarkFinalHash(b *testing.B) {

@@ -4,7 +4,7 @@ import "testing"
 
 // taken from monero: tests/hash/main.cpp:test_variant2_int_sqrt
 //
-// comment included as well.
+// comment is reserved as well.
 func TestV2Sqrt(t *testing.T) {
 	if o := v2Sqrt(0); o != 0 {
 		t.Fatalf("expected 0, got %v\n", o)
