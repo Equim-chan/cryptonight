@@ -76,6 +76,31 @@ func ExampleSum() {
 * 386
 * arm64
 
+== Benchmarks
+CPU: 4 x Intel(R) Xeon(R) CPU E3-1270 v3 @ 3.50GHz
+
+[source,plain]
+----
+goos: linux
+goarch: amd64
+pkg: ekyu.moe/cryptonight
+BenchmarkSum/v0-4                        50     28519327 ns/op   2106520 B/op   7 allocs/op
+BenchmarkSum/v1-4                        50     28311123 ns/op   2106520 B/op   7 allocs/op
+BenchmarkSum/v2-4                        50     36681472 ns/op   2106632 B/op   6 allocs/op
+BenchmarkSum/v0-parallel-4              200     10316107 ns/op   2106105 B/op   5 allocs/op
+BenchmarkSum/v1-parallel-4              200     10315372 ns/op   2106115 B/op   5 allocs/op
+BenchmarkSum/v2-parallel-4              100     13050225 ns/op   2106209 B/op   4 allocs/op
+BenchmarkSum/v0-parallel-cached-4       200      9805949 ns/op     42630 B/op   3 allocs/op
+BenchmarkSum/v1-parallel-cached-4       200      9208404 ns/op     42633 B/op   3 allocs/op
+BenchmarkSum/v2-parallel-cached-4       200     11438955 ns/op     42639 B/op   2 allocs/op
+BenchmarkFinalHash/BLAKE-256-4      1000000         1112 ns/op       208 B/op   3 allocs/op
+BenchmarkFinalHash/Groestl-256-4     200000         9339 ns/op       176 B/op   2 allocs/op
+BenchmarkFinalHash/JH-256-4          200000         8235 ns/op       256 B/op   2 allocs/op
+BenchmarkFinalHash/Skein-256-4      1000000         1639 ns/op       320 B/op   2 allocs/op
+BenchmarkDifficulty-4               5000000          375 ns/op       192 B/op   3 allocs/op
+BenchmarkCheckHash-4              100000000         15.4 ns/op         0 B/op   0 allocs/op
+----
+
 == Development
 While this repository is already out-of-box, which means what you need to do to use it in your code is just a `go get` (or `dep ensure -add` whatsoever), in case you want to hack on this library, some additional steps are required since it uses code generation.
 
