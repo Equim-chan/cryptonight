@@ -56,8 +56,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		// for variant 2
 		offset0, offset1, offset2 uint64
 		tmpChunk                  [2]uint64
-		dividend, divisor         uint64
-		divisionResult            uint64
+		divisor, divisionResult   uint64
 		sqrtInput, sqrtResult     uint64
 	)
 
@@ -95,7 +94,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 	}
 
 	for i := 0; i < 524288; i++ {
-		addr = ((a[0]) & 0x1ffff0) >> 3
+		addr = (a[0] & 0x1ffff0) >> 3
 		aes.CnSingleRound(c[:], cc.scratchpad[addr:], &a)
 
 		if variant == 2 {
@@ -126,7 +125,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			cc.scratchpad[addr+1] ^= v1Tmp << 24
 		}
 
-		addr = ((c[0]) & 0x1ffff0) >> 3
+		addr = (c[0] & 0x1ffff0) >> 3
 		d[0] = cc.scratchpad[addr]
 		d[1] = cc.scratchpad[addr+1]
 
@@ -134,9 +133,8 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			// equivalent to VARIANT2_PORTABLE_INTEGER_MATH in slow-hash.c
 			// VARIANT2_INTEGER_MATH_DIVISION_STEP
 			d[0] ^= divisionResult ^ (sqrtResult << 32)
-			dividend = c[1]
 			divisor = (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
-			divisionResult = (dividend/divisor)&0xffffffff + ((dividend % divisor) << 32)
+			divisionResult = (c[1]/divisor)&0xffffffff | (c[1]%divisor)<<32
 			sqrtInput = c[0] + divisionResult
 
 			// VARIANT2_INTEGER_MATH_SQRT_STEP_FP64 and
