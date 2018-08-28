@@ -13,12 +13,9 @@ func v2Sqrt(in uint64) uint64 {
 
 	s := out >> 1
 	b := out & 1
-	r := s*(s+b) + (out << 32) - in
-	if int64(r+b) > 0 {
+	r := s*(s+b) + (out << 32)
+	if r+b > in {
 		out--
-	}
-	if int64(r+s+(1<<32)) < 0 {
-		out++
 	}
 
 	return out
