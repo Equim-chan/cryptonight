@@ -107,5 +107,10 @@ $ go test -v -run=^$ -bench=. -benchmem
 * [x] Improve performance for variant 2
 * [ ] Improve performance for groestl and jh
 
+== References
+* https://cryptonote.org/cns/cns008.txt[CryptoNote Standard 008 - CryptoNight Hash Function]
+* https://github.com/monero-project/monero/pull/3253[Variant 1]
+* https://github.com/monero-project/monero/pull/4218[Variant 2]
+
 == License
 https://github.com/Equim-chan/cryptonight/blob/master/LICENSE[MIT]
