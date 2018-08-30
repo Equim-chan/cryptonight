@@ -84,21 +84,25 @@ CPU: 4 x Intel(R) Xeon(R) CPU E3-1270 v3 @ 3.50GHz
 goos: linux
 goarch: amd64
 pkg: ekyu.moe/cryptonight
-BenchmarkSum/v0-4                        50     28519327 ns/op   2106520 B/op   7 allocs/op
-BenchmarkSum/v1-4                        50     28311123 ns/op   2106520 B/op   7 allocs/op
-BenchmarkSum/v2-4                        50     36681472 ns/op   2106632 B/op   6 allocs/op
-BenchmarkSum/v0-parallel-4              200     10316107 ns/op   2106105 B/op   5 allocs/op
-BenchmarkSum/v1-parallel-4              200     10315372 ns/op   2106115 B/op   5 allocs/op
-BenchmarkSum/v2-parallel-4              100     13050225 ns/op   2106209 B/op   4 allocs/op
-BenchmarkSum/v0-parallel-cached-4       200      9805949 ns/op     42630 B/op   3 allocs/op
-BenchmarkSum/v1-parallel-cached-4       200      9208404 ns/op     42633 B/op   3 allocs/op
-BenchmarkSum/v2-parallel-cached-4       200     11438955 ns/op     42639 B/op   2 allocs/op
-BenchmarkFinalHash/BLAKE-256-4      1000000         1112 ns/op       208 B/op   3 allocs/op
-BenchmarkFinalHash/Groestl-256-4     200000         9339 ns/op       176 B/op   2 allocs/op
-BenchmarkFinalHash/JH-256-4          200000         8235 ns/op       256 B/op   2 allocs/op
-BenchmarkFinalHash/Skein-256-4      1000000         1639 ns/op       320 B/op   2 allocs/op
-BenchmarkDifficulty-4               5000000          375 ns/op       192 B/op   3 allocs/op
-BenchmarkCheckHash-4              100000000         15.4 ns/op         0 B/op   0 allocs/op
+BenchmarkSum/v0-naive-4                 100  29107872 ns/op  2106570 B/op   6 allocs/op
+BenchmarkSum/v1-naive-4                 100  28548981 ns/op  2106568 B/op   6 allocs/op
+BenchmarkSum/v2-naive-4                 100  36806285 ns/op  2106568 B/op   6 allocs/op
+BenchmarkSum/v0-cached-4                100  28430188 ns/op    21583 B/op   2 allocs/op
+BenchmarkSum/v1-cached-4                100  28107946 ns/op    21583 B/op   2 allocs/op
+BenchmarkSum/v2-cached-4                100  36070597 ns/op    21583 B/op   2 allocs/op
+BenchmarkSum/v0-parallel-naive-4        100  10572830 ns/op  2106398 B/op   5 allocs/op
+BenchmarkSum/v1-parallel-naive-4        100  10322516 ns/op  2106302 B/op   5 allocs/op
+BenchmarkSum/v2-parallel-naive-4        100  11734641 ns/op  2106324 B/op   5 allocs/op
+BenchmarkSum/v0-parallel-cached-4     10000   9560600 ns/op     1338 B/op   2 allocs/op
+BenchmarkSum/v1-parallel-cached-4     10000   9667099 ns/op     1339 B/op   2 allocs/op
+BenchmarkSum/v2-parallel-cached-4       100  11809401 ns/op    84837 B/op   2 allocs/op
+BenchmarkFinalHash/BLAKE-256-4      1000000      1108 ns/op      208 B/op   3 allocs/op
+BenchmarkFinalHash/Grøstl-256-4      200000      9552 ns/op      176 B/op   2 allocs/op
+BenchmarkFinalHash/JH-256-4          200000      8281 ns/op      256 B/op   2 allocs/op
+BenchmarkFinalHash/Skein-256-4      1000000      1636 ns/op      320 B/op   2 allocs/op
+BenchmarkDifficulty-4               5000000       389 ns/op      192 B/op   3 allocs/op
+BenchmarkCheckHash-4              100000000      15.8 ns/op       0 B/op    0 allocs/op
+PASS
 ----
 
 == Development
