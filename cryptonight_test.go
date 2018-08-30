@@ -91,66 +91,112 @@ func TestSum(t *testing.T) {
 }
 
 func BenchmarkSum(b *testing.B) {
-	// the data is special, when run into all v0, v1, v2 proccess, the final hash
-	// function is the same (blake-256), so that it can just be a bit more fair.
-	data, _ := hex.DecodeString("84cef46e501d92b6c76baa3cae99b142b0a2b9f3ada6c7e438be5b069702659b7e596ab33157a8d325ebb39c56e9906c8e68")
+	// This test data set is specially picked, as the final hash functions for
+	// all v0, v1, v2 when they are passed through are the same (Skein-256),
+	// so it can just be more fair.
+	data := [4][]byte{
+		{0x91, 0xf4, 0xb7, 0x5, 0x13, 0xd5, 0xe1, 0x49, 0x40, 0x67, 0x3a, 0x5d, 0xba, 0x49, 0x2c, 0x5d, 0xd1, 0x57, 0xc4, 0x95, 0xef, 0xdc, 0x5c, 0x87, 0x4f, 0x17, 0x80, 0x17, 0x25, 0x3e, 0x7c, 0x21, 0xc0, 0x83, 0x16, 0xd7, 0x57, 0x45, 0xfe, 0x4f, 0x31, 0xbb, 0x5b, 0x1a, 0x3e, 0x94, 0xc8, 0xee},
+		{0xb8, 0xd1, 0xfd, 0xeb, 0x39, 0xd4, 0xac, 0x67, 0xac, 0x52, 0xa7, 0x78, 0x0, 0x6d, 0x27, 0x81, 0xca, 0xf4, 0x3, 0x4e, 0x27, 0xa, 0xa7, 0x88, 0xd5, 0xce, 0xa2, 0x30, 0xb9, 0x3d, 0xca, 0x8, 0xb, 0xa3, 0x14, 0x41, 0x33, 0xe1, 0x1d, 0xaf, 0xd9, 0xed, 0xf1, 0x6, 0x83, 0x7a, 0x9e, 0xf3},
+		{0x7e, 0xe, 0xb9, 0x37, 0x7b, 0x5c, 0xff, 0x3b, 0xcf, 0xaa, 0xc1, 0x0, 0x4d, 0xf6, 0x6b, 0x26, 0xe8, 0xc1, 0x65, 0xe3, 0x34, 0x2f, 0xba, 0x79, 0xd2, 0x58, 0xf5, 0xd, 0x9c, 0x70, 0x2a, 0x65, 0x60, 0x63, 0x9f, 0x42, 0x92, 0x55, 0x4d, 0x72, 0xfa, 0xda, 0x16, 0x52, 0xfd, 0x2, 0x81, 0xe3},
+		{0x29, 0x16, 0xb0, 0x97, 0xd1, 0xee, 0x55, 0x50, 0xf9, 0x9c, 0xad, 0x53, 0x6e, 0x84, 0x2a, 0x39, 0xc8, 0xf6, 0x3f, 0x63, 0xad, 0x58, 0x33, 0x30, 0x1e, 0x53, 0x3b, 0xe4, 0xb, 0x57, 0xc4, 0x5c, 0x9d, 0xea, 0x85, 0x5c, 0x7b, 0x65, 0x20, 0xf0, 0x67, 0xff, 0xd0, 0xc1, 0x2b, 0x9a, 0x8c, 0x3d},
+	}
 
-	b.Run("v0", func(b *testing.B) {
+	b.Run("v0-naive", func(b *testing.B) {
+		b.N *= 100
 		for i := 0; i < b.N; i++ {
-			new(cache).sum(data, 0)
+			new(cache).sum(data[i&0x03], 0)
 		}
 	})
-	b.Run("v1", func(b *testing.B) {
+	b.Run("v1-naive", func(b *testing.B) {
+		b.N *= 100
 		for i := 0; i < b.N; i++ {
-			new(cache).sum(data, 1)
+			new(cache).sum(data[i&0x03], 1)
 		}
 	})
-	b.Run("v2", func(b *testing.B) {
+	b.Run("v2-naive", func(b *testing.B) {
+		b.N *= 100
 		for i := 0; i < b.N; i++ {
-			new(cache).sum(data, 2)
+			new(cache).sum(data[i&0x03], 2)
 		}
 	})
 
-	b.Run("v0-parallel", func(b *testing.B) {
+	b.Run("v0-cached", func(b *testing.B) {
+		b.N *= 100
+		for i := 0; i < b.N; i++ {
+			Sum(data[i&0x03], 0)
+		}
+	})
+	b.Run("v1-cached", func(b *testing.B) {
+		b.N *= 100
+		for i := 0; i < b.N; i++ {
+			Sum(data[i&0x03], 1)
+		}
+	})
+	b.Run("v2-cached", func(b *testing.B) {
+		b.N *= 100
+		for i := 0; i < b.N; i++ {
+			Sum(data[i&0x03], 2)
+		}
+	})
+
+	b.Run("v0-parallel-naive", func(b *testing.B) {
+		b.N *= 100
 		b.RunParallel(func(pb *testing.PB) {
+			i := 0
 			for pb.Next() {
-				new(cache).sum(data, 0)
+				new(cache).sum(data[i&0x03], 0)
+				i++
 			}
 		})
 	})
-	b.Run("v1-parallel", func(b *testing.B) {
+	b.Run("v1-parallel-naive", func(b *testing.B) {
+		b.N *= 100
 		b.RunParallel(func(pb *testing.PB) {
+			i := 0
 			for pb.Next() {
-				new(cache).sum(data, 1)
+				new(cache).sum(data[i&0x03], 1)
+				i++
 			}
 		})
 	})
-	b.Run("v2-parallel", func(b *testing.B) {
+	b.Run("v2-parallel-naive", func(b *testing.B) {
+		b.N *= 100
 		b.RunParallel(func(pb *testing.PB) {
+			i := 0
 			for pb.Next() {
-				new(cache).sum(data, 2)
+				new(cache).sum(data[i&0x03], 2)
+				i++
 			}
 		})
 	})
 
 	b.Run("v0-parallel-cached", func(b *testing.B) {
+		b.N *= 100
 		b.RunParallel(func(pb *testing.PB) {
+			i := 0
 			for pb.Next() {
-				Sum(data, 0)
+				Sum(data[i&0x03], 0)
+				i++
 			}
 		})
 	})
 	b.Run("v1-parallel-cached", func(b *testing.B) {
+		b.N *= 100
 		b.RunParallel(func(pb *testing.PB) {
+			i := 0
 			for pb.Next() {
-				Sum(data, 1)
+				Sum(data[i&0x03], 1)
+				i++
 			}
 		})
 	})
 	b.Run("v2-parallel-cached", func(b *testing.B) {
+		b.N *= 100
 		b.RunParallel(func(pb *testing.PB) {
+			i := 0
 			for pb.Next() {
-				Sum(data, 2)
+				Sum(data[i&0x03], 2)
+				i++
 			}
 		})
 	})
@@ -168,7 +214,7 @@ func BenchmarkFinalHash(b *testing.B) {
 			h.Sum(nil)
 		}
 	})
-	b.Run("Groestl-256", func(b *testing.B) {
+	b.Run("Grøstl-256", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			h := groestl.New256()
 			h.Write(in)
