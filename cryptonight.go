@@ -180,6 +180,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		b[1] = c[1]
 	}
 
+	//////////////////////////////////////////////////
 	// as per CNS008 sec.5 Result Calculation
 	aes.CnExpandKey(cc.finalState[4:8], &cc.rkeys)
 	tmp := cc.finalState[8:24] // a temp pointer
