@@ -20,8 +20,3 @@ jobs:
           command: |
             go test -v -coverprofile=coverage.txt -covermode=set -timeout=30m &&
             bash <(curl -s https://codecov.io/bash)
-      - run:
-          name: benchmark
-          command: |
-            sed -nr '/model name/ s/.*:\s*(.*) @ .*/\1/p' /proc/cpuinfo;
-            go test -v -run=^$ -bench=. -benchmem
