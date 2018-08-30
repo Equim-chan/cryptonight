@@ -14,6 +14,7 @@ package jh // import "ekyu.moe/cryptonight/jh"
 import (
 	"encoding/binary"
 	"hash"
+	"unsafe"
 )
 
 // This field is for macro definitions.
@@ -87,7 +88,7 @@ const _ = `
 `
 
 // For memset
-var zeroBuf64 [64]byte
+var zeroBuf64Byte [64]byte
 
 type state struct {
 	hashbitlen       int          // the message digest size
@@ -174,7 +175,7 @@ func (s *state) Sum(b []byte) []byte {
 
 	if s.databitlen&0x1ff == 0 {
 		// pad the message when databitlen is multiple of 512 bits, then process the padded block
-		copy(s.buffer[:], zeroBuf64[:])
+		s.buffer = zeroBuf64Byte
 		s.buffer[0] = 0x80
 		s.buffer[63] = uint8(s.databitlen)
 		s.buffer[62] = uint8(s.databitlen >> 8)
@@ -201,7 +202,7 @@ func (s *state) Sum(b []byte) []byte {
 		s.buffer[(s.databitlen&0x1ff)>>3] |= 1 << (7 - (s.databitlen & 7))
 
 		s.f8()
-		copy(s.buffer[:], zeroBuf64[:])
+		s.buffer = zeroBuf64Byte
 		s.buffer[63] = uint8(s.databitlen)
 		s.buffer[62] = uint8(s.databitlen >> 8)
 		s.buffer[61] = uint8(s.databitlen >> 16)
@@ -213,13 +214,7 @@ func (s *state) Sum(b []byte) []byte {
 		s.f8()
 	}
 
-	sum := make([]byte, 32)
-	binary.LittleEndian.PutUint64(sum, s.x[6][0])
-	binary.LittleEndian.PutUint64(sum[8:], s.x[6][1])
-	binary.LittleEndian.PutUint64(sum[16:], s.x[7][0])
-	binary.LittleEndian.PutUint64(sum[24:], s.x[7][1])
-
-	return append(b, sum...)
+	return append(b, (*[32]byte)(unsafe.Pointer(&s.x[6][0]))[:]...)
 }
 
 // The compression function F8.

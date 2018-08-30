@@ -44,8 +44,8 @@ const (
 )
 
 var (
-	zeroBuf64       [size512]byte
-	zeroBuf64Uint32 [size512 / 4]uint32
+	zeroBuf64Byte [size512]byte
+	zeroBuf64Word [size512 / 4]uint32
 )
 
 type state struct {
@@ -73,11 +73,11 @@ func New256() hash.Hash {
 }
 
 func (s *state) Reset() {
-	copy(s.chaining[:], zeroBuf64Uint32[:])
+	s.chaining = zeroBuf64Word
 	s.chaining[2*cols512-1] = 65536
 	s.blockCounter1 = 0
 	s.blockCounter2 = 0
-	copy(s.buffer[:], zeroBuf64[:])
+	s.buffer = zeroBuf64Byte
 	s.bufPtr = 0
 }
 
@@ -126,13 +126,13 @@ func (s *state) Sum(b []byte) []byte {
 	// pad with '0'-bits
 	if s.bufPtr > size512-lengthFieldLen {
 		// padding requires two blocks
-		n := copy(s.buffer[s.bufPtr:size512], zeroBuf64[:])
+		n := copy(s.buffer[s.bufPtr:size512], zeroBuf64Byte[:])
 		s.bufPtr += n
 		// digest first padding block
 		s.transform(s.buffer[:size512])
 		s.bufPtr = 0
 	}
-	n := copy(s.buffer[s.bufPtr:size512-lengthFieldLen], zeroBuf64[:])
+	n := copy(s.buffer[s.bufPtr:size512-lengthFieldLen], zeroBuf64Byte[:])
 	s.bufPtr += n
 
 	// length padding
@@ -158,11 +158,7 @@ func (s *state) Sum(b []byte) []byte {
 	s.outputTransformation()
 
 	// store hash result
-	dgst := make([]byte, hashByteLen)
-	c := ((*[((size512 / 4) - (0)) * 4]uint8)(unsafe.Pointer(&s.chaining[(0)])))
-	copy(dgst, c[size512-hashByteLen:size512])
-
-	return append(b, dgst...)
+	return append(b, ((*[((size512 / 4) - (hashByteLen / 4)) * 4]uint8)(unsafe.Pointer(&s.chaining[(hashByteLen / 4)])))[:]...)
 }
 
 // digest up to msglen bytes of input (full blocks only)
