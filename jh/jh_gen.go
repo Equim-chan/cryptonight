@@ -8,7 +8,7 @@
 //     src/crypto/jh.c
 //     src/crypto/jh.h
 //
-// Most comments in the original file is copied as well.
+// Most comments in the original file are copied as well.
 package jh // import "ekyu.moe/cryptonight/jh"
 
 import (

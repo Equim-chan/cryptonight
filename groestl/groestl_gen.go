@@ -9,7 +9,7 @@
 //     src/crypto/groestl.h
 //     src/crypto/groestl_tables.h
 //
-// Most comments in the original file is copied as well.
+// Most comments in the original file are copied as well.
 //
 // In this implementation, we assume all bytes are full.
 package groestl // import "ekyu.moe/cryptonight/groestl"
