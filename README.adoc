@@ -141,5 +141,13 @@ $ go test -v -run=^$ -bench=. -benchmem
 * https://github.com/monero-project/monero/pull/3253[Variant 1]
 * https://github.com/monero-project/monero/pull/4218[Variant 2]
 
+== Donation
+If you find this lib helpful, maybe consider buying me a cup of coffee at
+
+XMR:: `4777777jHFbZB4gyqrB1JHDtrGFusyj4b3M2nScYDPKEM133ng2QDrK9ycqizXS2XofADw5do5rU19LQmpTGCfeQTerm1Ti`
+BTC:: `1Eqqqq9xR78wJyRXXgvR73HEfKdEwq68BT`
+
+Much thanks.
+
 == License
 https://github.com/Equim-chan/cryptonight/blob/master/LICENSE[MIT]
