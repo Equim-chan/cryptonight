@@ -1,13 +1,14 @@
 package aes
 
 import (
+	"math/bits"
 	"unsafe"
 )
 
 func cnExpandKeyGo(key []uint64, rkeys *[40]uint32) {
 	for i := 0; i < 4; i++ {
-		rkeys[2*i] = uint32(key[i]&0xff<<24) | uint32(key[i]&0xff00<<8) | uint32(key[i]&0xff0000>>8) | uint32(key[i]&0xff000000>>24)
-		rkeys[2*i+1] = uint32(key[i]&0xff00000000>>8) | uint32(key[i]&0xff0000000000>>24) | uint32(key[i]&0xff000000000000>>40) | uint32(key[i]&0xff00000000000000>>56)
+		rkeys[2*i] = bits.ReverseBytes32(uint32(key[i]))
+		rkeys[2*i+1] = bits.ReverseBytes32(uint32(key[i] >> 32))
 	}
 
 	for i := 8; i < 40; i++ {
