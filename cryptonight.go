@@ -46,7 +46,6 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 	// these variables never escape to heap
 	var (
 		// used in memory hard
-		addr    uint64
 		a, c, d [2]uint64
 		b       [4]uint64 // variant 2 needs [4]uint64
 
@@ -54,10 +53,8 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		v1Tweak uint64
 
 		// for variant 2
-		offset0, offset1, offset2 uint64
-		tmpChunk                  [2]uint64
-		divisor, divisionResult   uint64
-		sqrtInput, sqrtResult     uint64
+		divisionResult        uint64
+		sqrtInput, sqrtResult uint64
 	)
 
 	//////////////////////////////////////////////////
@@ -94,17 +91,17 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 	}
 
 	for i := 0; i < 524288; i++ {
-		addr = (a[0] & 0x1ffff0) >> 3
+		addr := (a[0] & 0x1ffff0) >> 3
 		aes.CnSingleRound(c[:], cc.scratchpad[addr:], &a)
 
 		if variant == 2 {
 			// since we use []uint64 instead of []uint8 as scratchpad, the offset applies too
-			offset0 = addr ^ 0x02
-			offset1 = addr ^ 0x04
-			offset2 = addr ^ 0x06
+			offset0 := addr ^ 0x02
+			offset1 := addr ^ 0x04
+			offset2 := addr ^ 0x06
 
-			tmpChunk[0] = cc.scratchpad[offset0]
-			tmpChunk[1] = cc.scratchpad[offset0+1]
+			tmpChunk0 := cc.scratchpad[offset0]
+			tmpChunk1 := cc.scratchpad[offset0+1]
 
 			cc.scratchpad[offset0] = cc.scratchpad[offset2] + b[2]
 			cc.scratchpad[offset0+1] = cc.scratchpad[offset2+1] + b[3]
@@ -112,8 +109,8 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			cc.scratchpad[offset2] = cc.scratchpad[offset1] + a[0]
 			cc.scratchpad[offset2+1] = cc.scratchpad[offset1+1] + a[1]
 
-			cc.scratchpad[offset1] = tmpChunk[0] + b[0]
-			cc.scratchpad[offset1+1] = tmpChunk[1] + b[1]
+			cc.scratchpad[offset1] = tmpChunk0 + b[0]
+			cc.scratchpad[offset1+1] = tmpChunk1 + b[1]
 		}
 
 		cc.scratchpad[addr] = b[0] ^ c[0]
@@ -133,7 +130,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			// equivalent to VARIANT2_PORTABLE_INTEGER_MATH in slow-hash.c
 			// VARIANT2_INTEGER_MATH_DIVISION_STEP
 			d[0] ^= divisionResult ^ (sqrtResult << 32)
-			divisor = (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
+			divisor := (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
 			divisionResult = (c[1]/divisor)&0xffffffff | (c[1]%divisor)<<32
 			sqrtInput = c[0] + divisionResult
 
@@ -142,12 +139,12 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			sqrtResult = v2Sqrt(sqrtInput)
 
 			// shuffle again, it's the same process as above
-			offset0 = addr ^ 0x02
-			offset1 = addr ^ 0x04
-			offset2 = addr ^ 0x06
+			offset0 := addr ^ 0x02
+			offset1 := addr ^ 0x04
+			offset2 := addr ^ 0x06
 
-			tmpChunk[0] = cc.scratchpad[offset0]
-			tmpChunk[1] = cc.scratchpad[offset0+1]
+			tmpChunk0 := cc.scratchpad[offset0]
+			tmpChunk1 := cc.scratchpad[offset0+1]
 
 			cc.scratchpad[offset0] = cc.scratchpad[offset2] + b[2]
 			cc.scratchpad[offset0+1] = cc.scratchpad[offset2+1] + b[3]
@@ -155,8 +152,8 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			cc.scratchpad[offset2] = cc.scratchpad[offset1] + a[0]
 			cc.scratchpad[offset2+1] = cc.scratchpad[offset1+1] + a[1]
 
-			cc.scratchpad[offset1] = tmpChunk[0] + b[0]
-			cc.scratchpad[offset1+1] = tmpChunk[1] + b[1]
+			cc.scratchpad[offset1] = tmpChunk0 + b[0]
+			cc.scratchpad[offset1+1] = tmpChunk1 + b[1]
 
 			// re-asign higher-order of  b
 			b[2] = b[0]
