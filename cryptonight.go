@@ -51,7 +51,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		b       [4]uint64 // variant 2 needs [4]uint64
 
 		// for variant 1
-		v1Tweak, v1Tmp uint64
+		v1Tweak uint64
 
 		// for variant 2
 		offset0, offset1, offset2 uint64
@@ -120,9 +120,9 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		cc.scratchpad[addr+1] = b[1] ^ c[1]
 
 		if variant == 1 {
-			v1Tmp = cc.scratchpad[addr+1] >> 24
-			v1Tmp = ((^v1Tmp)&1)<<4 | (((^v1Tmp)&1)<<4&v1Tmp)<<1 | (v1Tmp&32)>>1
-			cc.scratchpad[addr+1] ^= v1Tmp << 24
+			t := cc.scratchpad[addr+1] >> 24
+			t = ((^t)&1)<<4 | (((^t)&1)<<4&t)<<1 | (t&32)>>1
+			cc.scratchpad[addr+1] ^= t << 24
 		}
 
 		addr = (c[0] & 0x1ffff0) >> 3
@@ -163,8 +163,11 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			b[3] = b[1]
 		}
 
-		// byteAdd and byteMul altogether
-		byteAddMul(&a, c[0], d[0])
+		// byteMul
+		lo, hi := mul128(c[0], d[0])
+		// byteAdd
+		a[0] += hi
+		a[1] += lo
 
 		cc.scratchpad[addr] = a[0]
 		cc.scratchpad[addr+1] = a[1]

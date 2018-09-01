@@ -50,21 +50,21 @@ func CheckHash(hash []byte, diff uint64) bool {
 	var low, high, top, cur, word uint64
 
 	word = binary.LittleEndian.Uint64(hash[24:])
-	mul128(&top, &high, word, diff)
+	top, high = mul128(word, diff)
 	if high != 0 {
 		return false
 	}
 
 	word = binary.LittleEndian.Uint64(hash)
-	mul128(&low, &cur, word, diff)
+	low, cur = mul128(word, diff)
 	word = binary.LittleEndian.Uint64(hash[8:])
-	mul128(&low, &high, word, diff)
+	low, high = mul128(word, diff)
 
 	carry := cur+low < cur
 	cur = high
 
 	word = binary.LittleEndian.Uint64(hash[16:])
-	mul128(&low, &high, word, diff)
+	low, high = mul128(word, diff)
 
 	carry = cur+low < cur || (carry && cur+low == math.MaxUint64)
 	carry = high+top < high || (carry && high+top == math.MaxUint64)
