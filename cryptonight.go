@@ -72,9 +72,9 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 
 	for i := 0; i < 2*1024*1024/8; i += 16 {
 		for j := 0; j < 16; j += 2 {
-			aes.CnRounds(cc.blocks[j:], cc.blocks[j:], &cc.rkeys)
+			aes.CnRounds(cc.blocks[j:j+2], cc.blocks[j:j+2], &cc.rkeys)
 		}
-		copy(cc.scratchpad[i:], cc.blocks[:])
+		copy(cc.scratchpad[i:i+16], cc.blocks[:16])
 	}
 
 	//////////////////////////////////////////////////
@@ -92,7 +92,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 
 	for i := 0; i < 524288; i++ {
 		addr := (a[0] & 0x1ffff0) >> 3
-		aes.CnSingleRound(c[:], cc.scratchpad[addr:], &a)
+		aes.CnSingleRound(c[:2], cc.scratchpad[addr:addr+2], &a)
 
 		if variant == 2 {
 			// since we use []uint64 instead of []uint8 as scratchpad, the offset applies too
@@ -189,7 +189,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 		for j := 0; j < 16; j += 2 {
 			cc.scratchpad[i+j] ^= tmp[j]
 			cc.scratchpad[i+j+1] ^= tmp[j+1]
-			aes.CnRounds(cc.scratchpad[i+j:], cc.scratchpad[i+j:], &cc.rkeys)
+			aes.CnRounds(cc.scratchpad[i+j:i+j+2], cc.scratchpad[i+j:i+j+2], &cc.rkeys)
 		}
 		tmp = cc.scratchpad[i : i+16]
 	}

@@ -53,6 +53,9 @@ func TestDifficulty(t *testing.T) {
 func TestCheckHash(t *testing.T) {
 	for i, v := range diffSpecs[:2] {
 		in, _ := hex.DecodeString(v.input)
+		if !CheckHash(in, 0) {
+			t.Errorf("\n[%d] check hash goes wrong", i)
+		}
 		if !CheckHash(in, v.output-1) {
 			t.Errorf("\n[%d] check hash goes wrong", i)
 		}
