@@ -73,7 +73,7 @@ TEXT ·cnExpandKeyAsm(SB), NOSPLIT, $0
     CALL _expand_key_256a<>(SB)
     RET
 
-TEXT _expand_key_128<>(SB), NOSPLIT, $0
+TEXT _expand_key_256a<>(SB), NOSPLIT, $0
     PSHUFD $0xff, X1, X1
     SHUFPS $0x10, X0, X4
     PXOR X4, X0
@@ -83,9 +83,6 @@ TEXT _expand_key_128<>(SB), NOSPLIT, $0
     MOVUPS X0, (BX)
     ADDQ $16, BX
     RET
-
-TEXT _expand_key_256a<>(SB), NOSPLIT, $0
-    JMP _expand_key_128<>(SB)
 
 TEXT _expand_key_256b<>(SB), NOSPLIT, $0
     PSHUFD $0xaa, X1, X1
