@@ -155,7 +155,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 			cc.scratchpad[offset1] = tmpChunk0 + b[0]
 			cc.scratchpad[offset1+1] = tmpChunk1 + b[1]
 
-			// re-asign higher-order of  b
+			// re-asign higher-order of b
 			b[2] = b[0]
 			b[3] = b[1]
 		}
@@ -200,7 +200,7 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 	// the final hash
 	hp := hashPool[cc.finalState[0]&0x03]
 	h := hp.Get().(hash.Hash)
-	h.Write((*[200]byte)(unsafe.Pointer(&cc.finalState[0]))[:])
+	h.Write((*[200]byte)(unsafe.Pointer(&cc.finalState))[:])
 	sum := h.Sum(nil)
 	h.Reset()
 	hp.Put(h)
