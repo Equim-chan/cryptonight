@@ -9,6 +9,9 @@ func TestV2Sqrt(t *testing.T) {
 	if o := v2Sqrt(0); o != 0 {
 		t.Fatalf("expected 0, got %v\n", o)
 	}
+	if o := v2Sqrt(1 << 63); o != 1930543745 {
+		t.Fatalf("expected 1930543745, got %v\n", o)
+	}
 	if o := v2Sqrt(^uint64(0)); o != 3558067407 {
 		t.Fatalf("expected 3558067407, got %v\n", o)
 	}
