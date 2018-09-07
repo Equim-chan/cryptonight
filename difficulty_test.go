@@ -30,24 +30,12 @@ func TestDifficulty(t *testing.T) {
 		}
 	}
 
-	func() {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected to panic, got nothing.")
-			}
-		}()
-
-		Difficulty([]byte("Obviously less than 32 bytes"))
-	}()
-	func() {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected to panic, got nothing.")
-			}
-		}()
-
-		CheckHash([]byte("Obviously less than 32 bytes"), 100)
-	}()
+	if diff := Difficulty([]byte("Obviously less than 32 bytes")); diff != 0 {
+		t.Errorf("\nexpected:\n\t%v\ngot:\n\t%v\n", 0, diff)
+	}
+	if diff := Difficulty([]byte("Here it is obviously more than 32 bytes")); diff != 0 {
+		t.Errorf("\nexpected:\n\t%v\ngot:\n\t%v\n", 0, diff)
+	}
 }
 
 func TestCheckHash(t *testing.T) {
@@ -65,6 +53,13 @@ func TestCheckHash(t *testing.T) {
 		if CheckHash(in, v.output+1) {
 			t.Errorf("\n[%d] check hash goes wrong", i)
 		}
+	}
+
+	if CheckHash([]byte("Obviously less than 32 bytes"), 0) {
+		t.Errorf("\nexpected:\n\tfalse\ngot:\n\ttrue\n")
+	}
+	if CheckHash([]byte("Here it is obviously more than 32 bytes"), 0) {
+		t.Errorf("\nexpected:\n\tfalse\ngot:\n\ttrue\n")
 	}
 }
 

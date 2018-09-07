@@ -62,6 +62,9 @@ func (cc *cache) sum(data []byte, variant int) []byte {
 	sha3.Keccak1600State(&cc.finalState, data)
 
 	if variant == 1 {
+		if len(data) < 43 {
+			panic("cryptonight: variant 2 requires at least 43 bytes of input")
+		}
 		// that's why data must have more than 43 bytes
 		v1Tweak = cc.finalState[24] ^ binary.LittleEndian.Uint64(data[35:43])
 	}

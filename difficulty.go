@@ -11,14 +11,20 @@ var (
 	bigZero   = big.NewInt(0)
 )
 
-// Difficulty returns hash's difficulty. hash must be at least 32 bytes long,
-// otherwise it will panic straightforward.
+// Difficulty returns hash's difficulty.
 //
-// Difficulty is slower than CheckHash, so it should only be used when necessary.
+// If len(hash) != 32, the return value is always 0.
+//
+// Difficulty is slower than CheckHash, so it should only be used when necessary,
+// for example when you want to tell the exact difficulty value of a hash.
 //
 // This isn't a part of CryptoNight, but since such demand of checking difficulty
 // is too common, it is thus included in this package.
 func Difficulty(hash []byte) uint64 {
+	if len(hash) != 32 {
+		return 0
+	}
+
 	// swap byte order, since SetBytes accepts big instead of little endian
 	buf := make([]byte, 32)
 	for i := 0; i < 16; i++ {
@@ -34,8 +40,9 @@ func Difficulty(hash []byte) uint64 {
 }
 
 // CheckHash checks hash's difficulty against diff. It returns true if hash's
-// difficulty is equal to or greater than diff. hash must be at least 32 bytes
-// long, otherwise it will panic straightforward.
+// difficulty is equal to or greater than diff.
+//
+// if len(hash) != 32, the return value is always false.
 //
 // CheckHash should be prefered over Difficulty if you only want to check if some
 // hash passes a specific difficulty, as CheckHash is very fast and requires
@@ -47,6 +54,10 @@ func Difficulty(hash []byte) uint64 {
 // This isn't a part of CryptoNight, but since such demand of checking difficulty
 // is too common, it is thus included in this package.
 func CheckHash(hash []byte, diff uint64) bool {
+	if len(hash) != 32 {
+		return false
+	}
+
 	var low, high, top, cur, word uint64
 
 	word = binary.LittleEndian.Uint64(hash[24:])
