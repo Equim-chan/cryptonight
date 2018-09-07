@@ -135,6 +135,7 @@ $ go test -v -run=^$ -bench=. -benchmem
 * [x] Tests on other architectures
 * [x] Improve performance for variant 2
 * [ ] Improve performance for groestl and jh
+* [ ] Try a nearly full assembly implementation (except for the final hash) for amd64
 
 == References
 * https://cryptonote.org/cns/cns008.txt[CryptoNote Standard 008 - CryptoNight Hash Function]
