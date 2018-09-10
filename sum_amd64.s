@@ -1,6 +1,7 @@
-#include "textflag.h"
-
+// amd64 assembly implementation for memory hard step, with SSE2 and AES-NI.
 // We don't use extra stack at all, and of course no CALL is made.
+
+#include "textflag.h"
 
 // common
 #define _cc    R8
@@ -189,7 +190,7 @@ ITER:
     CMPQ    BX, _tmp1            \
     SETHI   DL                   \
     SUBQ    DX, _sqrt_result     \ // sqrtResult += ((r2 + b > sqrtInput) ? -1 : 0)
-    \ // NOTICE: the following branch does not seem to be able to be covered,
+    \ // NOTE: the following branch does not seem to be able to be covered,
     \ //   i.e. it works without the code below.
     \ //   In case you find any issue, try de-commenting these.
     \

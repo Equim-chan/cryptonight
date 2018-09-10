@@ -14,10 +14,10 @@ var (
 )
 
 func (cc *cache) sum(data []byte, variant int) []byte {
-	if hasAES {
-		return cc.sumAsm(data, variant)
+	if !hasAES {
+		return cc.sumGo(data, variant)
 	}
-	return cc.sumGo(data, variant)
+	return cc.sumAsm(data, variant)
 }
 
 func (cc *cache) sumAsm(data []byte, variant int) []byte {

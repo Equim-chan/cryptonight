@@ -18,5 +18,13 @@ func v2Sqrt(in uint64) uint64 {
 		out--
 	}
 
+	// NOTE: the following branch does not seem to be able to be covered,
+	//   i.e. it works without the code below.
+	//   In case you find any issue, try de-commenting these.
+
+	// if r+1<<32 < in-s {
+	// 	out++
+	// }
+
 	return out
 }
