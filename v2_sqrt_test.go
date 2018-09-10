@@ -6,13 +6,22 @@ import "testing"
 //
 // comments are reserved as well.
 func TestV2Sqrt(t *testing.T) {
-	if o := v2Sqrt(0); o != 0 {
+	t.Run("ref", func(t *testing.T) {
+		testV2Sqrt(v2Sqrt, t)
+	})
+	t.Run("asm", func(t *testing.T) {
+		testV2Sqrt(v2SqrtAsm, t)
+	})
+}
+
+func testV2Sqrt(sqrt func(uint64) uint64, t *testing.T) {
+	if o := sqrt(0); o != 0 {
 		t.Fatalf("expected 0, got %v\n", o)
 	}
-	if o := v2Sqrt(1 << 63); o != 1930543745 {
+	if o := sqrt(1 << 63); o != 1930543745 {
 		t.Fatalf("expected 1930543745, got %v\n", o)
 	}
-	if o := v2Sqrt(^uint64(0)); o != 3558067407 {
+	if o := sqrt(^uint64(0)); o != 3558067407 {
 		t.Fatalf("expected 3558067407, got %v\n", o)
 	}
 
@@ -43,10 +52,10 @@ func TestV2Sqrt(t *testing.T) {
 			// int_sqrt_v2(i0^2+i0+1 + 2^32*i) must be equal to i
 			n1 = i0*i0 + i0 + (i << 32)
 		}
-		if o := v2Sqrt(n1); o != i-1 {
+		if o := sqrt(n1); o != i-1 {
 			t.Fatalf("expected %v, got %v\n", i-1, o)
 		}
-		if o := v2Sqrt(n1 + 1); o != i {
+		if o := sqrt(n1 + 1); o != i {
 			t.Fatalf("expected %v, got %v\n", i, o)
 		}
 	}
