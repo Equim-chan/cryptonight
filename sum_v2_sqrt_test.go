@@ -7,7 +7,7 @@ import "testing"
 // comments are reserved as well.
 func TestV2Sqrt(t *testing.T) {
 	t.Run("ref", func(t *testing.T) {
-		testV2Sqrt(v2Sqrt, t)
+		testV2Sqrt(v2SqrtGo, t)
 	})
 	t.Run("asm", func(t *testing.T) {
 		testV2Sqrt(v2SqrtAsm, t)

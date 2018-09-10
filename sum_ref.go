@@ -104,7 +104,7 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 
 			// VARIANT2_INTEGER_MATH_SQRT_STEP_FP64 and
 			// VARIANT2_INTEGER_MATH_SQRT_FIXUP
-			sqrtResult = v2Sqrt(sqrtInput)
+			sqrtResult = v2SqrtGo(sqrtInput)
 
 			// shuffle again, it's the same process as above
 			offset0 := addr ^ 0x02
