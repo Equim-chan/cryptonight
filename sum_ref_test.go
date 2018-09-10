@@ -1,24 +1,13 @@
 package cryptonight
 
 import (
-	"encoding/hex"
 	"testing"
 )
 
-func runRef(t *testing.T, hashSpecs []hashSpec) {
-	for i, v := range hashSpecs {
-		in, _ := hex.DecodeString(v.input)
-		result := new(cache).sumGo(in, v.variant)
-		if hex.EncodeToString(result) != v.output {
-			t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
-		}
-	}
-}
-
 func TestSumRef(t *testing.T) {
-	t.Run("v0", func(t *testing.T) { runRef(t, hashSpecsV0) })
+	t.Run("v0", func(t *testing.T) { run(t, new(cache).sumGo, hashSpecsV0) })
 	t.Run("v1", func(t *testing.T) {
-		runRef(t, hashSpecsV1)
+		run(t, new(cache).sumGo, hashSpecsV1)
 
 		func() {
 			defer func() {
@@ -30,7 +19,7 @@ func TestSumRef(t *testing.T) {
 			new(cache).sumGo([]byte("Obviously less than 43 bytes"), 1)
 		}()
 	})
-	t.Run("v2", func(t *testing.T) { runRef(t, hashSpecsV2) })
+	t.Run("v2", func(t *testing.T) { run(t, new(cache).sumGo, hashSpecsV2) })
 }
 
 func BenchmarkSumRef(b *testing.B) {

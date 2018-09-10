@@ -72,20 +72,20 @@ var (
 	}
 )
 
-func run(t *testing.T, hashSpecs []hashSpec) {
+func run(t *testing.T, sum func(data []byte, variant int) []byte, hashSpecs []hashSpec) {
 	for i, v := range hashSpecs {
 		in, _ := hex.DecodeString(v.input)
-		result := Sum(in, v.variant)
+		result := sum(in, v.variant)
 		if hex.EncodeToString(result) != v.output {
 			t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
 		}
 	}
 }
 
-func TestSumGo(t *testing.T) {
-	t.Run("v0", func(t *testing.T) { run(t, hashSpecsV0) })
+func TestSum(t *testing.T) {
+	t.Run("v0", func(t *testing.T) { run(t, new(cache).sum, hashSpecsV0) })
 	t.Run("v1", func(t *testing.T) {
-		run(t, hashSpecsV1)
+		run(t, new(cache).sum, hashSpecsV1)
 
 		func() {
 			defer func() {
@@ -97,7 +97,7 @@ func TestSumGo(t *testing.T) {
 			Sum([]byte("Obviously less than 43 bytes"), 1)
 		}()
 	})
-	t.Run("v2", func(t *testing.T) { run(t, hashSpecsV2) })
+	t.Run("v2", func(t *testing.T) { run(t, new(cache).sum, hashSpecsV2) })
 }
 
 func BenchmarkSum(b *testing.B) {

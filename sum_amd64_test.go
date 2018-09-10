@@ -1,17 +1,14 @@
 package cryptonight
 
 import (
-	"encoding/hex"
 	"testing"
 )
 
-func runAsm(t *testing.T, hashSpecs []hashSpec) {
-	for i, v := range hashSpecs {
-		in, _ := hex.DecodeString(v.input)
-		result := new(cache).sumAsm(in, v.variant)
-		if hex.EncodeToString(result) != v.output {
-			t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
-		}
+func TestSumWithoutAESNI(t *testing.T) {
+	if hasAES {
+		hasAES = false
+		TestSum(t)
+		hasAES = true
 	}
 }
 
@@ -20,9 +17,9 @@ func TestSumAsm(t *testing.T) {
 		t.Skip("host does not support AES-NI")
 	}
 
-	t.Run("v0", func(t *testing.T) { runAsm(t, hashSpecsV0) })
+	t.Run("v0", func(t *testing.T) { run(t, new(cache).sumAsm, hashSpecsV0) })
 	t.Run("v1", func(t *testing.T) {
-		runAsm(t, hashSpecsV1)
+		run(t, new(cache).sumAsm, hashSpecsV1)
 
 		func() {
 			defer func() {
@@ -34,7 +31,7 @@ func TestSumAsm(t *testing.T) {
 			new(cache).sumAsm([]byte("Obviously less than 43 bytes"), 1)
 		}()
 	})
-	t.Run("v2", func(t *testing.T) { runAsm(t, hashSpecsV2) })
+	t.Run("v2", func(t *testing.T) { run(t, new(cache).sumAsm, hashSpecsV2) })
 }
 
 func BenchmarkSumAsm(b *testing.B) {

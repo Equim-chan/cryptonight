@@ -1,20 +1,17 @@
 package cryptonight
 
-import "testing"
+import (
+	"testing"
+)
+
+func TestV2SqrtRef(t *testing.T) {
+	testV2Sqrt(t, v2SqrtGo)
+}
 
 // taken from monero: tests/hash/main.cpp:test_variant2_int_sqrt
 //
 // comments are reserved as well.
-func TestV2Sqrt(t *testing.T) {
-	t.Run("ref", func(t *testing.T) {
-		testV2Sqrt(v2SqrtGo, t)
-	})
-	t.Run("asm", func(t *testing.T) {
-		testV2Sqrt(v2SqrtAsm, t)
-	})
-}
-
-func testV2Sqrt(sqrt func(uint64) uint64, t *testing.T) {
+func testV2Sqrt(t *testing.T, sqrt func(uint64) uint64) {
 	if o := sqrt(0); o != 0 {
 		t.Fatalf("expected 0, got %v\n", o)
 	}
