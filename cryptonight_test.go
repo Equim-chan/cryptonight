@@ -83,9 +83,9 @@ func run(t *testing.T, sum func(data []byte, variant int) []byte, hashSpecs []ha
 }
 
 func TestSum(t *testing.T) {
-	t.Run("v0", func(t *testing.T) { run(t, new(cache).sum, hashSpecsV0) })
+	t.Run("v0", func(t *testing.T) { run(t, Sum, hashSpecsV0) })
 	t.Run("v1", func(t *testing.T) {
-		run(t, new(cache).sum, hashSpecsV1)
+		run(t, Sum, hashSpecsV1)
 
 		func() {
 			defer func() {
@@ -97,7 +97,7 @@ func TestSum(t *testing.T) {
 			Sum([]byte("Obviously less than 43 bytes"), 1)
 		}()
 	})
-	t.Run("v2", func(t *testing.T) { run(t, new(cache).sum, hashSpecsV2) })
+	t.Run("v2", func(t *testing.T) { run(t, Sum, hashSpecsV2) })
 }
 
 func BenchmarkSum(b *testing.B) {
