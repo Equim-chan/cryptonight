@@ -19,9 +19,9 @@ TEXT ·memhard1(SB), NOSPLIT, $0
     PXOR    _tmpX0, _tmpX1
     MOVOU   _tmpX1, _b     // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
-/*** <BEGIN> VARIANT1_INIT ***/
+    // <BEGIN> VARIANT1_INIT
     MOVQ    tweak+8(FP), _tweak
-/*** <END> VARIANT1_INIT ***/
+    // <END> VARIANT1_INIT
     MOVQ    $0x80000, _i
 ITER:
     MOVQ    _a, AX
@@ -36,7 +36,7 @@ ITER:
     PXOR    _c, _tmpX0
     MOVOU   _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
 
-/*** <BEGIN> VARIANT1_1 ***/
+    // <BEGIN> VARIANT1_1
     MOVB    11(_pad), CL  // tmp = ((uint8_t*)_pad)[11]
     MOVB    CL, BL
     SHRB    $3, CL
@@ -48,7 +48,7 @@ ITER:
     SHRL    CL, DX
     ANDL    $0x30, DX
     XORL    DX, 11(_pad)  // ((uint8_t*)_pad)[11] = tmp ^ ((table >> index) & 0x30)
-/*** <END> VARIANT1_1 ***/
+    // <END> VARIANT1_1
 
     MOVQ    _c, AX
     ANDQ    $0x1ffff0, AX      // addr = c[0] & 0x1ffff0
@@ -70,9 +70,9 @@ ITER:
     MOVLHPS _tmpX0, _a
 
     MOVOU   _a, 0(_pad) // cc.scratchpad[addr:addr+2] = a
-/*** <BEGIN> VARIANT1_2 ***/
+    // <BEGIN> VARIANT1_2
     XORQ    _tweak, 8(_pad)
-/*** <END> VARIANT1_2 ***/
+    // <END> VARIANT1_2
     PXOR    _d, _a  // a ^= d
     MOVOU   _c, _b  // b = c
 
