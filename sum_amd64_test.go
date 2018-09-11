@@ -7,8 +7,10 @@ import (
 func TestSumWithoutAESNI(t *testing.T) {
 	if hasAES {
 		hasAES = false
-		TestSum(t)
+		testSum(t, new(cache).sum)
 		hasAES = true
+	} else {
+		t.Skip("host does not support AES-NI")
 	}
 }
 
@@ -17,21 +19,7 @@ func TestSumAsm(t *testing.T) {
 		t.Skip("host does not support AES-NI")
 	}
 
-	t.Run("v0", func(t *testing.T) { run(t, new(cache).sumAsm, hashSpecsV0) })
-	t.Run("v1", func(t *testing.T) {
-		run(t, new(cache).sumAsm, hashSpecsV1)
-
-		func() {
-			defer func() {
-				if r := recover(); r == nil {
-					t.Fatal("expected to panic, got nothing.")
-				}
-			}()
-
-			new(cache).sumAsm([]byte("Obviously less than 43 bytes"), 1)
-		}()
-	})
-	t.Run("v2", func(t *testing.T) { run(t, new(cache).sumAsm, hashSpecsV2) })
+	testSum(t, new(cache).sumAsm)
 }
 
 func BenchmarkSumAsm(b *testing.B) {

@@ -4,25 +4,11 @@ import (
 	"testing"
 )
 
-func TestSumRef(t *testing.T) {
-	t.Run("v0", func(t *testing.T) { run(t, new(cache).sumGo, hashSpecsV0) })
-	t.Run("v1", func(t *testing.T) {
-		run(t, new(cache).sumGo, hashSpecsV1)
-
-		func() {
-			defer func() {
-				if r := recover(); r == nil {
-					t.Fatal("expected to panic, got nothing.")
-				}
-			}()
-
-			new(cache).sumGo([]byte("Obviously less than 43 bytes"), 1)
-		}()
-	})
-	t.Run("v2", func(t *testing.T) { run(t, new(cache).sumGo, hashSpecsV2) })
+func TestSumGo(t *testing.T) {
+	testSum(t, new(cache).sumGo)
 }
 
-func BenchmarkSumRef(b *testing.B) {
+func BenchmarkSumGo(b *testing.B) {
 	b.Run("v0", func(b *testing.B) {
 		b.N = 100
 		for i := 0; i < b.N; i++ {

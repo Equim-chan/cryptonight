@@ -72,20 +72,20 @@ var (
 	}
 )
 
-func run(t *testing.T, sum func(data []byte, variant int) []byte, hashSpecs []hashSpec) {
-	for i, v := range hashSpecs {
-		in, _ := hex.DecodeString(v.input)
-		result := sum(in, v.variant)
-		if hex.EncodeToString(result) != v.output {
-			t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
+func testSum(t *testing.T, sum func(data []byte, variant int) []byte) {
+	run := func(t *testing.T, hashSpecs []hashSpec) {
+		for i, v := range hashSpecs {
+			in, _ := hex.DecodeString(v.input)
+			result := sum(in, v.variant)
+			if hex.EncodeToString(result) != v.output {
+				t.Errorf("\n[%d] expected:\n\t%s\ngot:\n\t%x\n", i, v.output, result)
+			}
 		}
 	}
-}
 
-func TestSum(t *testing.T) {
-	t.Run("v0", func(t *testing.T) { run(t, Sum, hashSpecsV0) })
+	t.Run("v0", func(t *testing.T) { run(t, hashSpecsV0) })
 	t.Run("v1", func(t *testing.T) {
-		run(t, Sum, hashSpecsV1)
+		run(t, hashSpecsV1)
 
 		func() {
 			defer func() {
@@ -94,13 +94,15 @@ func TestSum(t *testing.T) {
 				}
 			}()
 
-			Sum([]byte("Obviously less than 43 bytes"), 1)
+			sum([]byte("Obviously less than 43 bytes"), 1)
 		}()
 	})
-	t.Run("v2", func(t *testing.T) { run(t, Sum, hashSpecsV2) })
+	t.Run("v2", func(t *testing.T) { run(t, hashSpecsV2) })
 }
 
-func BenchmarkSum(b *testing.B) {
+// Here we don't make a seperate template function, as we want the function address
+// to be known at link time so the result can be more accurate.
+func benchmarkSum(b *testing.B) {
 	b.Run("v0", func(b *testing.B) {
 		b.N = 100
 		for i := 0; i < b.N; i++ {

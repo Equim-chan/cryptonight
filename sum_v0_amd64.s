@@ -10,14 +10,12 @@ TEXT ·memhard0(SB), NOSPLIT, $0
     LEAQ    0x200000(_cc), AX  // *cc.finalState
 
     MOVOU   0(AX), _tmpX0
-    MOVOU   32(AX), _tmpX1
-    PXOR    _tmpX0, _tmpX1
-    MOVOU   _tmpX1, _a     // a = cc.finalState[0:2] ^ cc.finalState[4:6]
+    MOVOU   32(AX), _a
+    PXOR    _tmpX0, _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
     MOVOU   16(AX), _tmpX0
-    MOVOU   48(AX), _tmpX1
-    PXOR    _tmpX0, _tmpX1
-    MOVOU   _tmpX1, _b     // b = cc.finalState[2:4] ^ cc.finalState[6:8]
+    MOVOU   48(AX), _b
+    PXOR    _tmpX0, _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
     MOVQ    $0x80000, _i
 ITER:

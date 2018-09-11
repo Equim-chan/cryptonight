@@ -1,71 +1,25 @@
 // amd64 assembly implementation for memory hard step of variant 2, with SSE2 and AES-NI.
-// We don't use extra stack at all, and of course no CALL is made.
 
 #include "textflag.h"
 #include "sum_defs_amd64.h"
 
-#define V2_SQRT(sqrtInput) \
-    \ // <BEGIN> VARIANT2_INTEGER_MATH_SQRT_STEP
-    MOVQ    sqrtInput, AX            \
-    SHRQ    $12, AX                  \
-    MOVQ    $0x3ff0000000000000, BX  \
-    ADDQ    BX, AX                   \
-    MOVQ    AX, _tmpX0               \
-    SQRTSD  _tmpX0, _tmpX0           \
-    MOVQ    _tmpX0, _sqrt_result     \
-    SUBQ    BX, _sqrt_result         \ // sqrtResult is not yet sanitized
-    \ // <END> VARIANT2_INTEGER_MATH_SQRT_STEP
-    \ // <BEGIN> VARIANT2_INTEGER_MATH_SQRT_FIXUP
-    SHRQ    $19, _sqrt_result        \
-    MOVQ    _sqrt_result, AX         \
-    SHRQ    $1, AX                   \ // s = sqrtResult >> 1
-    MOVQ    _sqrt_result, BX         \
-    ANDQ    $1, BX                   \ // b = sqrtResult & 1
-    MOVQ    _sqrt_result, CX         \
-    SHLQ    $32, CX                  \
-    LEAQ    0(AX)(BX*1), DX          \
-    IMULQ   AX, DX                   \
-    ADDQ    DX, CX                   \ // r2 = s * (s + b) + (sqrtResult << 32)
-    \
-    ADDQ    CX, BX                   \
-    XORQ    DX, DX                   \
-    CMPQ    BX, sqrtInput            \
-    SETHI   DL                       \
-    SUBQ    DX, _sqrt_result         \ // sqrtResult += ((r2 + b > sqrtInput) ? -1 : 0)
-    \ // NOTE: the following branch does not seem to be able to be covered,
-    \ //   i.e. it works without the code below.
-    \ //   In case you find any issue, try de-commenting these.
-    \
-    \ // MOVQ    $0x100000000, DX
-    \ // LEAQ    0(CX)(DX*1), BX
-    \ // SUBQ    AX, sqrtInput
-    \ // XORQ    DX, DX
-    \ // CMPQ    BX, sqrtInput
-    \ // SETCS   DL
-    \ // ADDQ    DX, _sqrt_result  // sqrtResult += ((r2 + (1 << 32) < sqrtInput - s) ? 1 : 0)
-    \
-    \ // <END> VARIANT2_INTEGER_MATH_SQRT_FIXUP
-
 // func memhard2(cc *cache)
-TEXT ·memhard2(SB), NOSPLIT, $0
+TEXT ·memhard2(SB), NOSPLIT, $16
     MOVQ    cc+0(FP), _cc
     LEAQ    0x200000(_cc), AX  // *cc.finalState
 
     MOVOU   0(AX), _tmpX0
-    MOVOU   32(AX), _tmpX1
-    PXOR    _tmpX0, _tmpX1
-    MOVOU   _tmpX1, _a     // a = cc.finalState[0:2] ^ cc.finalState[4:6]
+    MOVOU   32(AX), _a
+    PXOR    _tmpX0, _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
     MOVOU   16(AX), _tmpX0
-    MOVOU   48(AX), _tmpX1
-    PXOR    _tmpX0, _tmpX1
-    MOVOU   _tmpX1, _b     // b = cc.finalState[2:4] ^ cc.finalState[6:8]
+    MOVOU   48(AX), _b
+    PXOR    _tmpX0, _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
     // <BEGIN> VARIANT2_INIT
     MOVOU   64(AX), _tmpX0
-    MOVOU   80(AX), _tmpX1
-    PXOR    _tmpX0, _tmpX1
-    MOVOU   _tmpX1, _e               // e = cc.finalState[8:10] ^ cc.finalState[10:12]
+    MOVOU   80(AX), _e
+    PXOR    _tmpX0, _e               // e = cc.finalState[8:10] ^ cc.finalState[10:12]
     MOVQ    96(AX), _division_result // divisionResult = cc.finalState[12]
     MOVQ    104(AX), _sqrt_result    // sqrtResult = cc.finalState[13]
     // <END> VARIANT2_INIT
@@ -136,9 +90,11 @@ ITER:
     LEAQ    0(AX)(DX*1), _division_result    // divisionResult = (c[1]/divisor)&0xffffffff | (c[1]%divisor)<<32
 
     MOVQ    X2, CX
-    LEAQ    0(CX)(_division_result*1), _tmp1 // sqrtInput = c[0] + divisionResult
+    LEAQ    0(CX)(_division_result*1), AX // sqrtInput = c[0] + divisionResult
     // <END> VARIANT2_INTEGER_MATH_DIVISION_STEP
-    V2_SQRT(_tmp1)
+    MOVQ    AX, 0(SP)
+    CALL    ·v2Sqrt(SB)
+    MOVQ    8(SP), _sqrt_result
 
     // <BEGIN> VARIANT2_SHUFFLE_ADD
     MOVQ    _tmp0, BX
@@ -184,11 +140,4 @@ ITER:
 
     DECQ    _i
     JNZ     ITER
-    RET
-
-// func v2SqrtAsm(sqrtInput uint64) (sqrtResult uint64)
-TEXT ·v2SqrtAsm(SB), NOSPLIT, $0
-    MOVQ    sqrtInput+0(FP), _tmp1
-    V2_SQRT(_tmp1)
-    MOVQ    _sqrt_result, sqrtResult+8(FP)
     RET

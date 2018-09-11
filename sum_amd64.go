@@ -81,7 +81,3 @@ func memhard1(cc *cache, tweak uint64)
 
 //go:noescape
 func memhard2(cc *cache)
-
-// v2SqrtAsm is here for testing only
-//go:noescape
-func v2SqrtAsm(sqrtInput uint64) (sqrtResult uint64)
