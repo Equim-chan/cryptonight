@@ -42,8 +42,8 @@ type cache struct {
 
 	scratchpad [2 * 1024 * 1024 / 8]uint64 // 2 MiB scratchpad for memhard loop
 	finalState [25]uint64                  // state of keccak1600
+	_          [8]byte                     // padded to keep 128-bit align (0x2000d0)
 
-	_      uint64     // padded to align
 	blocks [16]uint64 // temporary chunk/pointer of data
 	rkeys  [40]uint32 // 10 rounds, instead of 14 as in standard AES-256
 }

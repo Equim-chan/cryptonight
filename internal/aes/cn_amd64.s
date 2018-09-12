@@ -29,17 +29,6 @@ TEXT ·CnRoundsAsm(SB), NOSPLIT, $0
     MOVAPS X0, 0(AX)
     RET
 
-// func CnSingleRoundAsm(dst, src *uint64, rkey *uint64)
-TEXT ·CnSingleRoundAsm(SB), NOSPLIT, $0
-    MOVQ   dst+0(FP), AX
-    MOVQ   src+8(FP), BX
-    MOVQ   rkey+16(FP), CX
-    MOVAPS 0(BX), X0
-    MOVAPS 0(CX), X1
-    AESENC X1, X0
-    MOVAPS X0, 0(AX)
-    RET
-
 // func CnExpandKeyAsm(key *uint64, rkey *uint32)
 // Note that round keys are stored in uint128 format, not uint32
 TEXT ·CnExpandKeyAsm(SB), NOSPLIT, $0
