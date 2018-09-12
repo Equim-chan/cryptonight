@@ -21,10 +21,10 @@ TEXT ·v2Sqrt(SB), NOSPLIT, $0
     MOVQ    AX, _tmpX0
     SQRTSD  _tmpX0, _tmpX0
     MOVQ    _tmpX0, _tmp2
-    SUBQ    BX, _tmp2         // not yet sanitized sqrt result
+    SUBQ    BX, _tmp2
+    SHRQ    $19, _tmp2        // not yet sanitized sqrt result
     // <END> VARIANT2_INTEGER_MATH_SQRT_STEP
     // <BEGIN> VARIANT2_INTEGER_MATH_SQRT_FIXUP
-    SHRQ    $19, _tmp2
     MOVQ    _tmp2, AX
     SHRQ    $1, AX            // s = sqrtResult >> 1
     MOVQ    _tmp2, BX
