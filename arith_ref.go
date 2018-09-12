@@ -22,7 +22,7 @@ func mul128(x, y uint64) (lo, hi uint64) {
 	return
 }
 
-func v2SqrtGo(in uint64) uint64 {
+func v2Sqrt(in uint64) uint64 {
 	out := uint64(
 		math.Sqrt(
 			float64(in)+1<<64,
