@@ -34,7 +34,7 @@ var (
 
 type cache struct {
 	// DO NOT change the order of these fields in this struct!
-	// They are carefully placed in this order to keep at least 64-bit aligned
+	// They are carefully placed in this order to keep at least 128-bit aligned
 	// for some fields.
 	//
 	// In the future the alignment may be set explicitly, see
@@ -43,6 +43,7 @@ type cache struct {
 	scratchpad [2 * 1024 * 1024 / 8]uint64 // 2 MiB scratchpad for memhard loop
 	finalState [25]uint64                  // state of keccak1600
 
+	_      uint64     // padded to align
 	blocks [16]uint64 // temporary chunk/pointer of data
 	rkeys  [40]uint32 // 10 rounds, instead of 14 as in standard AES-256
 }

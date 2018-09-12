@@ -8,14 +8,14 @@ TEXT ·memhard2(SB), NOSPLIT, $16
     MOVQ    cc+0(FP), _cc
     LEAQ    0x200000(_cc), AX  // *cc.finalState
 
-    MOVOU   0(AX), _a
+    MOVAPS  0(AX), _a
     PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
-    MOVOU   16(AX), _b
+    MOVAPS  16(AX), _b
     PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
     // <BEGIN> VARIANT2_INIT
-    MOVOU   64(AX), _e
+    MOVAPS  64(AX), _e
     PXOR    80(AX), _e               // e = cc.finalState[8:10] ^ cc.finalState[10:12]
     MOVQ    96(AX), _division_result // divisionResult = cc.finalState[12]
     MOVQ    104(AX), _sqrt_result    // sqrtResult = cc.finalState[13]
@@ -28,40 +28,40 @@ ITER:
     LEAQ    0(_cc)(AX*1), _pad
 
     // single round of AES
-    MOVOU   0(_pad), _c
+    MOVAPS  0(_pad), _c
     AESENC  _a, _c
 
     // <BEGIN> VARIANT2_SHUFFLE_ADD
     MOVQ    AX, BX
     XORQ    $0x10, BX
     LEAQ    0(_cc)(BX*1), BX
-    MOVOU   0(BX), _tmpX0     // chunk0
+    MOVAPS  0(BX), _tmpX0     // chunk0
     MOVQ    AX, CX
     XORQ    $0x20, CX
     LEAQ    0(_cc)(CX*1), CX
-    MOVOU   0(CX), _tmpX1     // chunk1
+    MOVAPS  0(CX), _tmpX1     // chunk1
     MOVQ    AX, DX
     XORQ    $0x30, DX
     LEAQ    0(_cc)(DX*1), DX
-    MOVOU   0(DX), _tmpX2     // chunk2
+    MOVAPS  0(DX), _tmpX2     // chunk2
 
     PADDQ   _e, _tmpX2
     PADDQ   _b, _tmpX0
     PADDQ   _a, _tmpX1
 
-    MOVOU   _tmpX2, 0(BX)
-    MOVOU   _tmpX0, 0(CX)
-    MOVOU   _tmpX1, 0(DX)
+    MOVAPS  _tmpX2, 0(BX)
+    MOVAPS  _tmpX0, 0(CX)
+    MOVAPS  _tmpX1, 0(DX)
     // <END> VARIANT2_SHUFFLE_ADD
 
-    MOVOU   _b, _tmpX0
+    MOVAPS  _b, _tmpX0
     PXOR    _c, _tmpX0
-    MOVOU   _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
+    MOVAPS  _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
 
     MOVQ    _c, _tmp0
     ANDQ    $0x1ffff0, _tmp0   // addr = c[0] & 0x1ffff0
     LEAQ    0(_cc)(_tmp0*1), _pad
-    MOVOU   0(_pad), _d
+    MOVAPS  0(_pad), _d
 
     // <BEGIN> VARIANT2_INTEGER_MATH_DIVISION_STEP
     MOVQ    _d, BX             // d[0]
@@ -74,7 +74,7 @@ ITER:
     MOVLHPS _tmpX0, _tmpX0
     MOVHLPS _tmpX0, _d
 
-    MOVQ    _c, CX
+    MOVL    _c, CX
     LEAL    0(CX)(_sqrt_result*2), CX
     ORL     $0x80000001, CX    // divisor = (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
 
@@ -97,25 +97,25 @@ ITER:
     MOVQ    _tmp0, BX
     XORQ    $0x10, BX
     LEAQ    0(_cc)(BX*1), BX
-    MOVOU   0(BX), _tmpX0     // chunk0
+    MOVAPS  0(BX), _tmpX0     // chunk0
     MOVQ    _tmp0, CX
     XORQ    $0x20, CX
     LEAQ    0(_cc)(CX*1), CX
-    MOVOU   0(CX), _tmpX1     // chunk1
+    MOVAPS  0(CX), _tmpX1     // chunk1
     MOVQ    _tmp0, DX
     XORQ    $0x30, DX
     LEAQ    0(_cc)(DX*1), DX
-    MOVOU   0(DX), _tmpX2     // chunk2
+    MOVAPS  0(DX), _tmpX2     // chunk2
 
     PADDQ   _e, _tmpX2
     PADDQ   _b, _tmpX0
     PADDQ   _a, _tmpX1
 
-    MOVOU   _tmpX2, 0(BX)
-    MOVOU   _tmpX0, 0(CX)
-    MOVOU   _tmpX1, 0(DX)
+    MOVAPS  _tmpX2, 0(BX)
+    MOVAPS  _tmpX0, 0(CX)
+    MOVAPS  _tmpX1, 0(DX)
     // <END> VARIANT2_SHUFFLE_ADD
-    MOVOU   _b, _e  // e = b
+    MOVAPS  _b, _e  // e = b
 
     // byteMul
     MOVQ    _c, AX
@@ -131,9 +131,9 @@ ITER:
     MOVQ    CX, _tmpX0
     MOVLHPS _tmpX0, _a
 
-    MOVOU   _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
+    MOVAPS  _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
     PXOR    _d, _a       // a ^= d
-    MOVOU   _c, _b       // b = c
+    MOVAPS  _c, _b       // b = c
 
     DECQ    _i
     JNZ     ITER

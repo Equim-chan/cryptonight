@@ -9,10 +9,10 @@ TEXT ·memhard1(SB), NOSPLIT, $0
     MOVQ    cc+0(FP), _cc
     LEAQ    0x200000(_cc), AX  // *cc.finalState
 
-    MOVOU   0(AX), _a
+    MOVAPS  0(AX), _a
     PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
-    MOVOU   16(AX), _b
+    MOVAPS  16(AX), _b
     PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
     // <BEGIN> VARIANT1_INIT
@@ -25,12 +25,12 @@ ITER:
     LEAQ    0(_cc)(AX*1), _pad
 
     // single round of AES
-    MOVOU   0(_pad), _c
+    MOVAPS  0(_pad), _c
     AESENC  _a, _c
 
-    MOVOU   _b, _tmpX0
+    MOVAPS  _b, _tmpX0
     PXOR    _c, _tmpX0
-    MOVOU   _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
+    MOVAPS  _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
 
     // <BEGIN> VARIANT1_1
     MOVB    11(_pad), CL       // tmp = ((uint8_t*)_pad)[11]
@@ -49,7 +49,7 @@ ITER:
     MOVQ    _c, AX
     ANDQ    $0x1ffff0, AX      // addr = c[0] & 0x1ffff0
     LEAQ    0(_cc)(AX*1), _pad
-    MOVOU   0(_pad), _d
+    MOVAPS  0(_pad), _d
 
     // byteMul
     MOVQ    _c, AX
@@ -65,12 +65,12 @@ ITER:
     MOVQ    CX, _tmpX0
     MOVLHPS _tmpX0, _a
 
-    MOVOU   _a, 0(_pad) // cc.scratchpad[addr:addr+2] = a
+    MOVAPS  _a, 0(_pad) // cc.scratchpad[addr:addr+2] = a
     // <BEGIN> VARIANT1_2
     XORQ    _tweak, 8(_pad)
     // <END> VARIANT1_2
     PXOR    _d, _a  // a ^= d
-    MOVOU   _c, _b  // b = c
+    MOVAPS  _c, _b  // b = c
 
     DECQ    _i
     JNZ     ITER
