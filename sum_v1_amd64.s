@@ -9,13 +9,11 @@ TEXT ·memhard1(SB), NOSPLIT, $0
     MOVQ    cc+0(FP), _cc
     LEAQ    0x200000(_cc), AX  // *cc.finalState
 
-    MOVOU   0(AX), _tmpX0
-    MOVOU   32(AX), _a
-    PXOR    _tmpX0, _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
+    MOVOU   0(AX), _a
+    PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
-    MOVOU   16(AX), _tmpX0
-    MOVOU   48(AX), _b
-    PXOR    _tmpX0, _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
+    MOVOU   16(AX), _b
+    PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
     // <BEGIN> VARIANT1_INIT
     MOVQ    tweak+8(FP), _tweak
@@ -35,17 +33,17 @@ ITER:
     MOVOU   _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
 
     // <BEGIN> VARIANT1_1
-    MOVB    11(_pad), CL  // tmp = ((uint8_t*)_pad)[11]
+    MOVB    11(_pad), CL       // tmp = ((uint8_t*)_pad)[11]
     MOVB    CL, BL
     SHRB    $3, CL
     ANDB    $6, CL
     ANDB    $1, BL
     ORB     BL, CL
-    SHLB    $1, CL        // index = (((tmp >> 3) & 6) | (tmp & 1)) << 1
-    MOVL    $0x75310, DX  // table = 0x75310
+    SHLB    $1, CL             // index = (((tmp >> 3) & 6) | (tmp & 1)) << 1
+    MOVL    $0x75310, DX       // table = 0x75310
     SHRL    CL, DX
     ANDL    $0x30, DX
-    XORL    DX, 11(_pad)  // ((uint8_t*)_pad)[11] = tmp ^ ((table >> index) & 0x30)
+    XORL    DX, 11(_pad)       // ((uint8_t*)_pad)[11] = tmp ^ ((table >> index) & 0x30)
     // <END> VARIANT1_1
 
     MOVQ    _c, AX

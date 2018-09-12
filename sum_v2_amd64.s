@@ -8,18 +8,15 @@ TEXT ·memhard2(SB), NOSPLIT, $16
     MOVQ    cc+0(FP), _cc
     LEAQ    0x200000(_cc), AX  // *cc.finalState
 
-    MOVOU   0(AX), _tmpX0
-    MOVOU   32(AX), _a
-    PXOR    _tmpX0, _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
+    MOVOU   0(AX), _a
+    PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
-    MOVOU   16(AX), _tmpX0
-    MOVOU   48(AX), _b
-    PXOR    _tmpX0, _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
+    MOVOU   16(AX), _b
+    PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
     // <BEGIN> VARIANT2_INIT
-    MOVOU   64(AX), _tmpX0
-    MOVOU   80(AX), _e
-    PXOR    _tmpX0, _e               // e = cc.finalState[8:10] ^ cc.finalState[10:12]
+    MOVOU   64(AX), _e
+    PXOR    80(AX), _e               // e = cc.finalState[8:10] ^ cc.finalState[10:12]
     MOVQ    96(AX), _division_result // divisionResult = cc.finalState[12]
     MOVQ    104(AX), _sqrt_result    // sqrtResult = cc.finalState[13]
     // <END> VARIANT2_INIT
@@ -38,15 +35,15 @@ ITER:
     MOVQ    AX, BX
     XORQ    $0x10, BX
     LEAQ    0(_cc)(BX*1), BX
-    MOVOU   0(BX), _tmpX0  // chunk0
+    MOVOU   0(BX), _tmpX0     // chunk0
     MOVQ    AX, CX
     XORQ    $0x20, CX
     LEAQ    0(_cc)(CX*1), CX
-    MOVOU   0(CX), _tmpX1  // chunk1
+    MOVOU   0(CX), _tmpX1     // chunk1
     MOVQ    AX, DX
     XORQ    $0x30, DX
     LEAQ    0(_cc)(DX*1), DX
-    MOVOU   0(DX), _tmpX2  // chunk2
+    MOVOU   0(DX), _tmpX2     // chunk2
 
     PADDQ   _e, _tmpX2
     PADDQ   _b, _tmpX0
@@ -100,15 +97,15 @@ ITER:
     MOVQ    _tmp0, BX
     XORQ    $0x10, BX
     LEAQ    0(_cc)(BX*1), BX
-    MOVOU   0(BX), _tmpX0  // chunk0
+    MOVOU   0(BX), _tmpX0     // chunk0
     MOVQ    _tmp0, CX
     XORQ    $0x20, CX
     LEAQ    0(_cc)(CX*1), CX
-    MOVOU   0(CX), _tmpX1  // chunk1
+    MOVOU   0(CX), _tmpX1     // chunk1
     MOVQ    _tmp0, DX
     XORQ    $0x30, DX
     LEAQ    0(_cc)(DX*1), DX
-    MOVOU   0(DX), _tmpX2  // chunk2
+    MOVOU   0(DX), _tmpX2     // chunk2
 
     PADDQ   _e, _tmpX2
     PADDQ   _b, _tmpX0
