@@ -102,7 +102,7 @@ func testSum(t *testing.T, sum func(data []byte, variant int) []byte) {
 
 // Here we don't make a seperate template function, as we want the function address
 // to be known at link time so the result can be more accurate.
-func benchmarkSum(b *testing.B) {
+func BenchmarkSum(b *testing.B) {
 	b.Run("v0", func(b *testing.B) {
 		b.N = 100
 		for i := 0; i < b.N; i++ {
