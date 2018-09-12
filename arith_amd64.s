@@ -9,7 +9,6 @@ TEXT ·mul128(SB), NOSPLIT, $0
     MOVQ    DX, hi+24(FP)
     RET
 
-
 // func v2Sqrt(in uint64) (out uint64)
 TEXT ·v2Sqrt(SB), NOSPLIT, $0
     MOVQ    in+0(FP), _tmp1
@@ -22,7 +21,7 @@ TEXT ·v2Sqrt(SB), NOSPLIT, $0
     MOVQ    AX, _tmpX0
     SQRTSD  _tmpX0, _tmpX0
     MOVQ    _tmpX0, _tmp2
-    SUBQ    BX, _tmp2         // sqrtResult is not yet sanitized
+    SUBQ    BX, _tmp2         // not yet sanitized sqrt result
     // <END> VARIANT2_INTEGER_MATH_SQRT_STEP
     // <BEGIN> VARIANT2_INTEGER_MATH_SQRT_FIXUP
     SHRQ    $19, _tmp2

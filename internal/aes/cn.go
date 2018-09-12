@@ -17,7 +17,7 @@ package aes // import "ekyu.moe/cryptonight/internal/aes"
 // Note that this is CryptoNight specific.
 // This is non-standard AES!
 func CnExpandKey(key []uint64, rkeys *[40]uint32) {
-	cnExpandKey(key, rkeys)
+	CnExpandKeyGo(key, rkeys)
 }
 
 // CnRounds = (SubBytes, ShiftRows, MixColumns, AddRoundKey) * 10,
@@ -27,7 +27,7 @@ func CnExpandKey(key []uint64, rkeys *[40]uint32) {
 // Note that this is CryptoNight specific.
 // This is non-standard AES!
 func CnRounds(dst, src []uint64, rkeys *[40]uint32) {
-	cnRounds(dst, src, rkeys)
+	CnRoundsGo(dst, src, rkeys)
 }
 
 // CnSingleRound performs exactly one AES round, i.e.
@@ -38,5 +38,5 @@ func CnRounds(dst, src []uint64, rkeys *[40]uint32) {
 // Note that this is CryptoNight specific.
 // CnSingleRound * 10 might not be equivalent to one CnRounds.
 func CnSingleRound(dst, src []uint64, rkey *[2]uint64) {
-	cnSingleRound(dst, src, rkey)
+	CnSingleRoundGo(dst, src, rkey)
 }

@@ -5,7 +5,7 @@ import (
 	"unsafe"
 )
 
-func cnExpandKeyGo(key []uint64, rkeys *[40]uint32) {
+func CnExpandKeyGo(key []uint64, rkeys *[40]uint32) {
 	for i := 0; i < 4; i++ {
 		rkeys[2*i] = bits.ReverseBytes32(uint32(key[i]))
 		rkeys[2*i+1] = bits.ReverseBytes32(uint32(key[i] >> 32))
@@ -22,7 +22,7 @@ func cnExpandKeyGo(key []uint64, rkeys *[40]uint32) {
 	}
 }
 
-func cnRoundsGo(dst, src []uint64, rkeys *[40]uint32) {
+func CnRoundsGo(dst, src []uint64, rkeys *[40]uint32) {
 	src8 := (*[16]byte)(unsafe.Pointer(&src[0]))
 	dst8 := (*[16]byte)(unsafe.Pointer(&dst[0]))
 
@@ -47,7 +47,7 @@ func cnRoundsGo(dst, src []uint64, rkeys *[40]uint32) {
 	dst8[12], dst8[13], dst8[14], dst8[15] = byte(s3>>24), byte(s3>>16), byte(s3>>8), byte(s3)
 }
 
-func cnSingleRoundGo(dst, src []uint64, rkey *[2]uint64) {
+func CnSingleRoundGo(dst, src []uint64, rkey *[2]uint64) {
 	src8 := (*[16]byte)(unsafe.Pointer(&src[0]))
 	dst8 := (*[16]byte)(unsafe.Pointer(&dst[0]))
 	rkey32 := (*[4]uint32)(unsafe.Pointer(&rkey[0]))
