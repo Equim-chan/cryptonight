@@ -34,7 +34,7 @@ var (
 
 type cache struct {
 	// DO NOT change the order of these fields in this struct!
-	// They are carefully placed in this order to keep at least 128-bit aligned
+	// They are carefully placed in this order to keep at least 16-byte aligned
 	// for some fields.
 	//
 	// In the future the alignment may be set explicitly, see
@@ -42,7 +42,7 @@ type cache struct {
 
 	scratchpad [2 * 1024 * 1024 / 8]uint64 // 2 MiB scratchpad for memhard loop
 	finalState [25]uint64                  // state of keccak1600
-	_          [8]byte                     // padded to keep 128-bit align (0x2000d0)
+	_          [8]byte                     // padded to keep 16-byte align (0x2000d0)
 
 	blocks [16]uint64 // temporary chunk/pointer of data
 	rkeys  [40]uint32 // 10 rounds, instead of 14 as in standard AES-256
@@ -51,10 +51,10 @@ type cache struct {
 func (cc *cache) finalHash() []byte {
 	// the final hash
 	hp := hashPool[cc.finalState[0]&0x03]
+	h.Reset()
 	h := hp.Get().(hash.Hash)
 	h.Write((*[200]byte)(unsafe.Pointer(&cc.finalState))[:])
 	sum := h.Sum(nil)
-	h.Reset()
 	hp.Put(h)
 
 	return sum
