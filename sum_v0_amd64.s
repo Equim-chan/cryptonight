@@ -9,10 +9,10 @@ TEXT ·memhard0(SB), NOSPLIT, $0
     MOVQ    cc+0(FP), _cc
     LEAQ    0x200000(_cc), AX  // *cc.finalState
 
-    MOVAPS  0(AX), _a
+    MOVO    0(AX), _a
     PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
-    MOVAPS  16(AX), _b
+    MOVO    16(AX), _b
     PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
     MOVQ    $0x80000, _i
@@ -22,17 +22,17 @@ ITER:
     LEAQ    0(_cc)(AX*1), _pad
 
     // single round of AES
-    MOVAPS  0(_pad), _c
+    MOVO    0(_pad), _c
     AESENC  _a, _c
 
-    MOVAPS  _b, _tmpX0
+    MOVO    _b, _tmpX0
     PXOR    _c, _tmpX0
-    MOVAPS  _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
+    MOVO    _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
 
     MOVQ    _c, AX
     ANDQ    $0x1ffff0, AX      // addr = c[0] & 0x1ffff0
     LEAQ    0(_cc)(AX*1), _pad
-    MOVAPS  0(_pad), _d
+    MOVO    0(_pad), _d
 
     // byteMul
     MOVQ    _c, AX
@@ -48,9 +48,9 @@ ITER:
     MOVQ    CX, _tmpX0
     MOVLHPS _tmpX0, _a
 
-    MOVAPS  _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
+    MOVO    _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
     PXOR    _d, _a       // a ^= d
-    MOVAPS  _c, _b       // b = c
+    MOVO    _c, _b       // b = c
 
     DECQ    _i
     JNZ     ITER
