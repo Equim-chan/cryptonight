@@ -30,12 +30,12 @@ ITER:
     MOVO    _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
 
     MOVQ    _c, AX
-    ANDQ    $0x1ffff0, AX      // addr = c[0] & 0x1ffff0
-    LEAQ    0(_cc)(AX*1), _pad
+    MOVQ    AX, BX
+    ANDQ    $0x1ffff0, BX      // addr = c[0] & 0x1ffff0
+    LEAQ    0(_cc)(BX*1), _pad
     MOVO    0(_pad), _d
 
     // byteMul
-    MOVQ    _c, AX
     MOVQ    _d, BX
     MULQ    BX
     // byteAdd

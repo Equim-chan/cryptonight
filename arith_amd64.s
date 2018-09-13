@@ -46,11 +46,11 @@ TEXT ·v2Sqrt(SB), NOSPLIT, $0
 
     // MOVQ    $0x100000000, DX
     // LEAQ    0(CX)(DX*1), BX
-    // SUBQ    AX, sqrtInput
+    // SUBQ    AX, _tmp1
     // XORQ    DX, DX
-    // CMPQ    BX, sqrtInput
+    // CMPQ    BX, _tmp1
     // SETCS   DL
-    // ADDQ    DX, _sqrt_result  // sqrtResult += ((r2 + (1 << 32) < sqrtInput - s) ? 1 : 0)
+    // ADDQ    DX, _tmp2  // sqrtResult += ((r2 + (1 << 32) < sqrtInput - s) ? 1 : 0)
 
     // <END> VARIANT2_INTEGER_MATH_SQRT_FIXUP
 
