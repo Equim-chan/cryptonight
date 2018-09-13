@@ -51,8 +51,8 @@ type cache struct {
 func (cc *cache) finalHash() []byte {
 	// the final hash
 	hp := hashPool[cc.finalState[0]&0x03]
-	h.Reset()
 	h := hp.Get().(hash.Hash)
+	h.Reset()
 	h.Write((*[200]byte)(unsafe.Pointer(&cc.finalState))[:])
 	sum := h.Sum(nil)
 	hp.Put(h)
