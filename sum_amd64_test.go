@@ -5,13 +5,13 @@ import (
 )
 
 func TestSumWithoutAESNI(t *testing.T) {
-	if hasAES {
-		hasAES = false
-		testSum(t, new(cache).sum)
-		hasAES = true
-	} else {
+	if !hasAES {
 		t.Skip("host does not support AES-NI")
 	}
+
+	hasAES = false
+	testSum(t, new(cache).sum)
+	hasAES = true
 }
 
 func TestSumAsm(t *testing.T) {
