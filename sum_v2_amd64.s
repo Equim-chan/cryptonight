@@ -76,7 +76,7 @@ ITER:
 
 	MOVL    _c, CX
 	LEAL    0(CX)(_sqrt_result*2), CX
-	ORL     $0x80000001, CX     // divisor = (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
+	ORL     $0x80000001, CX      // divisor = (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
 
 	MOVHLPS _c, _tmpX0
 	MOVQ    _tmpX0, AX

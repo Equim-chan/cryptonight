@@ -16,7 +16,7 @@ TEXT ·v2Sqrt(SB), NOSPLIT, $0
 	// <BEGIN> VARIANT2_INTEGER_MATH_SQRT_STEP
 	MOVQ    _tmp1, AX
 	SHRQ    $12, AX
-	MOVQ    $0x3ff0000000000000, BX
+	MOVQ    $(1023 << 52), BX
 	ADDQ    BX, AX
 	MOVQ    AX, _tmpX0
 	SQRTSD  _tmpX0, _tmpX0
