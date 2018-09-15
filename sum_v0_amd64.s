@@ -6,52 +6,52 @@
 
 // func memhard0(cc *cache)
 TEXT ·memhard0(SB), NOSPLIT, $0
-    MOVQ    cc+0(FP), _cc
-    LEAQ    0x200000(_cc), AX  // *cc.finalState
+	MOVQ    cc+0(FP), _cc
+	LEAQ    0x200000(_cc), AX  // *cc.finalState
 
-    MOVO    0(AX), _a
-    PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
+	MOVO    0(AX), _a
+	PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
-    MOVO    16(AX), _b
-    PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
+	MOVO    16(AX), _b
+	PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
-    MOVQ    $0x80000, _i
+	MOVQ    $0x80000, _i
 ITER:
-    MOVQ    _a, AX
-    ANDQ    $0x1ffff0, AX      // addr = a[0] & 0x1ffff0
-    LEAQ    0(_cc)(AX*1), _pad
+	MOVQ    _a, AX
+	ANDQ    $0x1ffff0, AX      // addr = a[0] & 0x1ffff0
+	LEAQ    0(_cc)(AX*1), _pad
 
-    // single round of AES
-    MOVO    0(_pad), _c
-    AESENC  _a, _c
+	// single round of AES
+	MOVO    0(_pad), _c
+	AESENC  _a, _c
 
-    MOVO    _b, _tmpX0
-    PXOR    _c, _tmpX0
-    MOVO    _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
+	MOVO    _b, _tmpX0
+	PXOR    _c, _tmpX0
+	MOVO    _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
 
-    MOVQ    _c, AX
-    MOVQ    AX, BX
-    ANDQ    $0x1ffff0, BX      // addr = c[0] & 0x1ffff0
-    LEAQ    0(_cc)(BX*1), _pad
-    MOVO    0(_pad), _d
+	MOVQ    _c, AX
+	MOVQ    AX, BX
+	ANDQ    $0x1ffff0, BX      // addr = c[0] & 0x1ffff0
+	LEAQ    0(_cc)(BX*1), _pad
+	MOVO    0(_pad), _d
 
-    // byteMul
-    MOVQ    _d, BX
-    MULQ    BX
-    // byteAdd
-    MOVQ    _a, BX  // a[0]
-    MOVHLPS _a, _a
-    MOVQ    _a, CX  // a[1]
-    ADDQ    DX, BX
-    ADDQ    AX, CX
-    MOVQ    BX, _a
-    MOVQ    CX, _tmpX0
-    MOVLHPS _tmpX0, _a
+	// byteMul
+	MOVQ    _d, BX
+	MULQ    BX
+	// byteAdd
+	MOVQ    _a, BX  // a[0]
+	MOVHLPS _a, _a
+	MOVQ    _a, CX  // a[1]
+	ADDQ    DX, BX
+	ADDQ    AX, CX
+	MOVQ    BX, _a
+	MOVQ    CX, _tmpX0
+	MOVLHPS _tmpX0, _a
 
-    MOVO    _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
-    PXOR    _d, _a       // a ^= d
-    MOVO    _c, _b       // b = c
+	MOVO    _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
+	PXOR    _d, _a       // a ^= d
+	MOVO    _c, _b       // b = c
 
-    DECQ    _i
-    JNZ     ITER
-    RET
+	DECQ    _i
+	JNZ     ITER
+	RET
