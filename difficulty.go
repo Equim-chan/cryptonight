@@ -7,8 +7,13 @@ import (
 )
 
 var (
-	oneLsh256 = new(big.Int).Lsh(big.NewInt(1), 256)
-	bigZero   = big.NewInt(0)
+	bigMaxUint256 = new(big.Int).SetBytes([]byte{
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	})
+	bigZero = big.NewInt(0)
 )
 
 // Difficulty returns hash's difficulty.
@@ -36,7 +41,7 @@ func Difficulty(hash []byte) uint64 {
 		return 0
 	}
 
-	return hashBig.Div(oneLsh256, hashBig).Uint64()
+	return hashBig.Div(bigMaxUint256, hashBig).Uint64()
 }
 
 // CheckHash checks hash's difficulty against diff. It returns true if hash's
