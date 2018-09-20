@@ -18,9 +18,9 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 		v1Tweak uint64
 
 		// for variant 2
-		e              [2]uint64
-		divisionResult uint64
-		sqrtResult     uint64
+		e          [2]uint64
+		divResult  uint64
+		sqrtResult uint64
 	)
 
 	//////////////////////////////////////////////////
@@ -54,7 +54,7 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 	if variant == 2 {
 		e[0] = cc.finalState[8] ^ cc.finalState[10]
 		e[1] = cc.finalState[9] ^ cc.finalState[11]
-		divisionResult = cc.finalState[12]
+		divResult = cc.finalState[12]
 		sqrtResult = cc.finalState[13]
 	}
 
@@ -97,10 +97,10 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 		if variant == 2 {
 			// equivalent to VARIANT2_PORTABLE_INTEGER_MATH in slow-hash.c
 			// VARIANT2_INTEGER_MATH_DIVISION_STEP
-			d[0] ^= divisionResult ^ (sqrtResult << 32)
+			d[0] ^= divResult ^ (sqrtResult << 32)
 			divisor := (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
-			divisionResult = (c[1]/divisor)&0xffffffff | (c[1]%divisor)<<32
-			sqrtInput := c[0] + divisionResult
+			divResult = (c[1]/divisor)&0xffffffff | (c[1]%divisor)<<32
+			sqrtInput := c[0] + divResult
 
 			// VARIANT2_INTEGER_MATH_SQRT_STEP_FP64 and
 			// VARIANT2_INTEGER_MATH_SQRT_FIXUP

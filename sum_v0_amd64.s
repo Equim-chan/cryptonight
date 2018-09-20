@@ -6,48 +6,48 @@
 
 // func memhard0(cc *cache)
 TEXT ·memhard0(SB), NOSPLIT, $0
-	MOVQ    cc+0(FP), _cc
-	LEAQ    0x200000(_cc), AX  // *cc.finalState
+	MOVQ    cc+0(FP), STATE
+	LEAQ    PAD_SIZE(STATE), AX // *cc.finalState
 
-	MOVO    0(AX), _a
-	PXOR    32(AX), _a         // a = cc.finalState[0:2] ^ cc.finalState[4:6]
+	MOVO    0(AX), A
+	PXOR    32(AX), A           // a = cc.finalState[0:2] ^ cc.finalState[4:6]
 
-	MOVO    16(AX), _b
-	PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
+	MOVO    16(AX), B
+	PXOR    48(AX), B           // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
-	MOVQ    $0x80000, _i
-ITER:
-	MOVQ    _a, AX
-	ANDQ    $0x1ffff0, AX      // addr = a[0] & 0x1ffff0
-	LEAQ    0(_cc)(AX*1), _pad
+	MOVQ    $ITER, I
+LOOP:
+	MOVQ    A, AX
+	ANDQ    $0x1ffff0, AX       // addr = a[0] & 0x1ffff0
+	LEAQ    0(STATE)(AX*1), CHUNK
 
 	// single round of AES
-	MOVO    0(_pad), _c
-	AESENC  _a, _c
+	MOVO    0(CHUNK), C
+	AESENC  A, C
 
-	MOVO    _b, _tmpX0
-	PXOR    _c, _tmpX0
-	MOVO    _tmpX0, 0(_pad)    // cc.scratchpad[addr:addr+2] = b ^ c
+	MOVO    B, TMPX0
+	PXOR    C, TMPX0
+	MOVO    TMPX0, 0(CHUNK)     // cc.scratchpad[addr:addr+2] = b ^ c
 
-	MOVQ    _c, AX
+	MOVQ    C, AX
 	MOVQ    AX, BX
-	ANDQ    $0x1ffff0, BX      // addr = c[0] & 0x1ffff0
-	LEAQ    0(_cc)(BX*1), _pad
-	MOVO    0(_pad), _d
+	ANDQ    $0x1ffff0, BX       // addr = c[0] & 0x1ffff0
+	LEAQ    0(STATE)(BX*1), CHUNK
+	MOVO    0(CHUNK), D
 
 	// byteMul
-	MOVQ    _d, BX
+	MOVQ    D, BX
 	MULQ    BX
-	MOVQ    DX, _tmpX0
-	MOVQ    AX, _tmpX1
-	MOVLHPS _tmpX1, _tmpX0
+	MOVQ    DX, TMPX0
+	MOVQ    AX, TMPX1
+	MOVLHPS TMPX1, TMPX0
 	// byteAdd
-	PADDQ   _tmpX0, _a
+	PADDQ   TMPX0, A
 
-	MOVO    _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
-	PXOR    _d, _a       // a ^= d
-	MOVO    _c, _b       // b = c
+	MOVO    A, 0(CHUNK) // cc.scratchpad[addr:addr+2] = a
+	PXOR    D, A        // a ^= d
+	MOVO    C, B        // b = c
 
-	DECQ    _i
-	JNZ     ITER
+	DECQ    I
+	JNZ     LOOP
 	RET
