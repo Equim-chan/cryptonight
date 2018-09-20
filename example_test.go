@@ -17,7 +17,7 @@ func ExampleSum() {
 	// Output:
 	// 0999794e4e20d86e6a81b54495aeb370b6a9ae795fb5af4f778afaf07c0b2e0e
 	// 261124c5a6dca5d4aa3667d328a94ead9a819ae714e1f1dc113ceeb14f1ecf99
-	// c163d3839d69259d59b7f9b9a09dc043c3b11e34986c2a783091dbdcebed19f9
+	// 8cda858c882f3f1d1e997d7ae892decd53c169912751f078eba0d9e96c3dc115
 }
 
 func ExampleCheckHash() {

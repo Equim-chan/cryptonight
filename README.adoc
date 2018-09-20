@@ -58,17 +58,17 @@ import (
 )
 
 func main() {
-    original := []byte("Hello, 世界")
-    fmt.Printf("%x\n", cryptonight.Sum(original, 0)) // original
+    blob := []byte("Hello, 世界")
+    fmt.Printf("%x\n", cryptonight.Sum(blob, 0)) // original
     // Output: 0999794e4e20d86e6a81b54495aeb370b6a9ae795fb5af4f778afaf07c0b2e0e
 
-    variant_v1 := []byte("variant 1 requires at least 43 bytes of input.")
-    fmt.Printf("%x\n", cryptonight.Sum(variant_v1, 1)) // variant 1
+    blob = []byte("variant 1 requires at least 43 bytes of input.")
+    fmt.Printf("%x\n", cryptonight.Sum(blob, 1)) // variant 1
     // Output: 261124c5a6dca5d4aa3667d328a94ead9a819ae714e1f1dc113ceeb14f1ecf99
 
-    variant_v2 := []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
-    fmt.Printf("%x\n", cryptonight.Sum(variant_v2, 2)) // variant 2
-    // Output: c163d3839d69259d59b7f9b9a09dc043c3b11e34986c2a783091dbdcebed19f9
+    blob = []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
+    fmt.Printf("%x\n", cryptonight.Sum(blob, 2)) // variant 2
+    // Output: 8cda858c882f3f1d1e997d7ae892decd53c169912751f078eba0d9e96c3dc115
 }
 ----
 

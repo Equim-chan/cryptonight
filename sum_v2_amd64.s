@@ -97,24 +97,26 @@ ITER:
 	MOVQ    _c, AX
 	MOVQ    _d, BX
 	MULQ    BX
+	MOVQ    DX, _tmpX3
+	MOVQ    AX, _tmpX0
+	MOVLHPS _tmpX0, _tmpX3
 
 	// <BEGIN> VARIANT2_SHUFFLE_ADD
 	MOVQ    _tmp0, BX
 	XORQ    $0x10, BX
 	LEAQ    0(_cc)(BX*1), BX
-	// <BEGIN> VARIANT2_2_1
-	XORQ    DX, 0(BX)
-	XORQ    AX, 8(BX)
-	// <END> VARIANT2_2_1
 	MOVO    0(BX), _tmpX0     // chunk0
+	// <BEGIN> VARIANT2_2_1
+	PXOR    _tmpX3, _tmpX0
+	// <END> VARIANT2_2_1
 	MOVQ    _tmp0, CX
 	XORQ    $0x20, CX
 	LEAQ    0(_cc)(CX*1), CX
 	MOVO    0(CX), _tmpX1     // chunk1
-	MOVQ    _tmp0, _tmp1
-	XORQ    $0x30, _tmp1
-	LEAQ    0(_cc)(_tmp1*1), _tmp1
-	MOVO    0(_tmp1), _tmpX2     // chunk2
+	MOVQ    _tmp0, DX
+	XORQ    $0x30, DX
+	LEAQ    0(_cc)(DX*1), DX
+	MOVO    0(DX), _tmpX2     // chunk2
 
 	PADDQ   _e, _tmpX2
 	PADDQ   _b, _tmpX0
@@ -122,23 +124,15 @@ ITER:
 
 	MOVO    _tmpX2, 0(BX)
 	MOVO    _tmpX0, 0(CX)
-	MOVO    _tmpX1, 0(_tmp1)
+	MOVO    _tmpX1, 0(DX)
 	// <END> VARIANT2_SHUFFLE_ADD
 	// <BEGIN> VARIANT2_2_2
-	XORQ    0(CX), DX
-	XORQ    8(CX), AX
+	PXOR    _tmpX0, _tmpX3
 	// <END> VARIANT2_2_2
 	MOVO    _b, _e  // e = b
 
 	// byteAdd
-	MOVQ    _a, BX  // a[0]
-	MOVHLPS _a, _a
-	MOVQ    _a, CX  // a[1]
-	ADDQ    DX, BX
-	ADDQ    AX, CX
-	MOVQ    BX, _a
-	MOVQ    CX, _tmpX0
-	MOVLHPS _tmpX0, _a
+	PADDQ   _tmpX3, _a
 
 	MOVO    _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
 	PXOR    _d, _a       // a ^= d

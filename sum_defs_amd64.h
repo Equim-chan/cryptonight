@@ -12,6 +12,7 @@
 #define _tmpX0 X15
 #define _tmpX1 X14
 #define _tmpX2 X13
+#define _tmpX3 X12
 
 // variant 1
 #define _tweak R11
