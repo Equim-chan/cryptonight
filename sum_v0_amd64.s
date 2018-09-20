@@ -38,15 +38,11 @@ ITER:
 	// byteMul
 	MOVQ    _d, BX
 	MULQ    BX
+	MOVQ    DX, _tmpX0
+	MOVQ    AX, _tmpX1
+	MOVLHPS _tmpX1, _tmpX0
 	// byteAdd
-	MOVQ    _a, BX  // a[0]
-	MOVHLPS _a, _a
-	MOVQ    _a, CX  // a[1]
-	ADDQ    DX, BX
-	ADDQ    AX, CX
-	MOVQ    BX, _a
-	MOVQ    CX, _tmpX0
-	MOVLHPS _tmpX0, _a
+	PADDQ   _tmpX0, _a
 
 	MOVO    _a, 0(_pad)  // cc.scratchpad[addr:addr+2] = a
 	PXOR    _d, _a       // a ^= d
