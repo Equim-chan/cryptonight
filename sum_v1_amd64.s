@@ -16,8 +16,8 @@ TEXT ·memhard1(SB), NOSPLIT, $0
 	PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
 	// <BEGIN> VARIANT1_INIT
-	PXOR    _tweak, _tweak
 	MOVQ    tweak+8(FP), _tmpX0
+	PXOR    _tweak, _tweak
 	MOVLHPS _tmpX0, _tweak
 	// <END> VARIANT1_INIT
 	MOVQ    $0x80000, _i

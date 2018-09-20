@@ -68,11 +68,8 @@ ITER:
 	MOVQ    _sqrt_result, CX
 	SHLQ    $32, CX
 	XORQ    _division_result, CX
-	XORQ    CX, BX               // d[0] ^= divisionResult ^ (sqrtResult << 32)
-	// TODO：replace with PSHUFHW?
-	MOVQ    BX, _tmpX0
-	MOVLHPS _tmpX0, _tmpX0
-	MOVHLPS _tmpX0, _d
+	MOVQ    CX, _tmpX0
+	PXOR    _tmpX0, _d           // d[0] ^= divisionResult ^ (sqrtResult << 32)
 
 	MOVL    _c, CX
 	LEAL    0(CX)(_sqrt_result*2), CX
