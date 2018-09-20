@@ -16,7 +16,9 @@ TEXT ·memhard1(SB), NOSPLIT, $0
 	PXOR    48(AX), _b         // b = cc.finalState[2:4] ^ cc.finalState[6:8]
 
 	// <BEGIN> VARIANT1_INIT
-	MOVQ    tweak+8(FP), _tweak
+	PXOR    _tweak, _tweak
+	MOVQ    tweak+8(FP), _tmpX0
+	MOVLHPS _tmpX0, _tweak
 	// <END> VARIANT1_INIT
 	MOVQ    $0x80000, _i
 ITER:
@@ -61,10 +63,12 @@ ITER:
 	// byteAdd
 	PADDQ   _tmpX0, _a
 
-	MOVO    _a, 0(_pad) // cc.scratchpad[addr:addr+2] = a
 	// <BEGIN> VARIANT1_2
-	XORQ    _tweak, 8(_pad)
+	MOVO    _a, _tmpX0
+	PXOR    _tweak, _tmpX0
 	// <END> VARIANT1_2
+
+	MOVO    _tmpX0, 0(_pad) // cc.scratchpad[addr:addr+2] = a
 	PXOR    _d, _a  // a ^= d
 	MOVO    _c, _b  // b = c
 

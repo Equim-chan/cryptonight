@@ -15,7 +15,7 @@
 #define _tmpX3 X12
 
 // variant 1
-#define _tweak R11
+#define _tweak X4
 
 // variant 2
 #define _e     X4
