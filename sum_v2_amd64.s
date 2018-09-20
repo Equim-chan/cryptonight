@@ -90,22 +90,31 @@ ITER:
 	LEAQ    0(CX)(_division_result*1), AX // sqrtInput = c[0] + divisionResult
 	// <END> VARIANT2_INTEGER_MATH_DIVISION_STEP
 	MOVQ    AX, 0(SP)
-	CALL    ·v2Sqrt(SB)
+	CALL    ·v2Sqrt(SB)       // uses _tmp1 and _tmp2
 	MOVQ    8(SP), _sqrt_result
+
+	// byteMul
+	MOVQ    _c, AX
+	MOVQ    _d, BX
+	MULQ    BX
 
 	// <BEGIN> VARIANT2_SHUFFLE_ADD
 	MOVQ    _tmp0, BX
 	XORQ    $0x10, BX
 	LEAQ    0(_cc)(BX*1), BX
+	// <BEGIN> VARIANT2_2_1
+	XORQ    DX, 0(BX)
+	XORQ    AX, 8(BX)
+	// <END> VARIANT2_2_1
 	MOVO    0(BX), _tmpX0     // chunk0
 	MOVQ    _tmp0, CX
 	XORQ    $0x20, CX
 	LEAQ    0(_cc)(CX*1), CX
 	MOVO    0(CX), _tmpX1     // chunk1
-	MOVQ    _tmp0, DX
-	XORQ    $0x30, DX
-	LEAQ    0(_cc)(DX*1), DX
-	MOVO    0(DX), _tmpX2     // chunk2
+	MOVQ    _tmp0, _tmp1
+	XORQ    $0x30, _tmp1
+	LEAQ    0(_cc)(_tmp1*1), _tmp1
+	MOVO    0(_tmp1), _tmpX2     // chunk2
 
 	PADDQ   _e, _tmpX2
 	PADDQ   _b, _tmpX0
@@ -113,14 +122,14 @@ ITER:
 
 	MOVO    _tmpX2, 0(BX)
 	MOVO    _tmpX0, 0(CX)
-	MOVO    _tmpX1, 0(DX)
+	MOVO    _tmpX1, 0(_tmp1)
 	// <END> VARIANT2_SHUFFLE_ADD
+	// <BEGIN> VARIANT2_2_2
+	XORQ    0(CX), DX
+	XORQ    8(CX), AX
+	// <END> VARIANT2_2_2
 	MOVO    _b, _e  // e = b
 
-	// byteMul
-	MOVQ    _c, AX
-	MOVQ    _d, BX
-	MULQ    BX
 	// byteAdd
 	MOVQ    _a, BX  // a[0]
 	MOVHLPS _a, _a

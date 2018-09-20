@@ -105,6 +105,15 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 			// VARIANT2_INTEGER_MATH_SQRT_STEP_FP64 and
 			// VARIANT2_INTEGER_MATH_SQRT_FIXUP
 			sqrtResult = v2Sqrt(sqrtInput)
+		}
+
+		// byteMul
+		lo, hi := mul128(c[0], d[0])
+
+		if variant == 2 {
+			// VARIANT2_2_1
+			cc.scratchpad[addr^0x02] ^= hi
+			cc.scratchpad[addr^0x02+1] ^= lo
 
 			// shuffle again, it's the same process as above
 			offset0 := addr ^ 0x02
@@ -123,13 +132,15 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 			cc.scratchpad[offset1] = tmpChunk0 + b[0]
 			cc.scratchpad[offset1+1] = tmpChunk1 + b[1]
 
+			// VARIANT2_2_2
+			hi ^= cc.scratchpad[addr^0x04]
+			lo ^= cc.scratchpad[addr^0x04+1]
+
 			// re-asign higher-order of b
 			e[0] = b[0]
 			e[1] = b[1]
 		}
 
-		// byteMul
-		lo, hi := mul128(c[0], d[0])
 		// byteAdd
 		a[0] += hi
 		a[1] += lo
