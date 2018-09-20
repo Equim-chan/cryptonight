@@ -111,14 +111,14 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 		lo, hi := mul128(c[0], d[0])
 
 		if variant == 2 {
-			// VARIANT2_2_1
-			cc.scratchpad[addr^0x02] ^= hi
-			cc.scratchpad[addr^0x02+1] ^= lo
-
 			// shuffle again, it's the same process as above
 			offset0 := addr ^ 0x02
 			offset1 := addr ^ 0x04
 			offset2 := addr ^ 0x06
+
+			// VARIANT2_2_1
+			cc.scratchpad[offset0] ^= hi
+			cc.scratchpad[offset0+1] ^= lo
 
 			tmpChunk0 := cc.scratchpad[offset0]
 			tmpChunk1 := cc.scratchpad[offset0+1]
@@ -133,8 +133,8 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 			cc.scratchpad[offset1+1] = tmpChunk1 + b[1]
 
 			// VARIANT2_2_2
-			hi ^= cc.scratchpad[addr^0x04]
-			lo ^= cc.scratchpad[addr^0x04+1]
+			hi ^= cc.scratchpad[offset1]
+			lo ^= cc.scratchpad[offset1+1]
 
 			// re-asign higher-order of b
 			e[0] = b[0]
