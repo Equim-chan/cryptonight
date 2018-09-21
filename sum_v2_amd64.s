@@ -4,7 +4,7 @@
 #include "sum_defs_amd64.h"
 
 // func memhard2(cc *cache)
-TEXT ·memhard2(SB), NOSPLIT, $16
+TEXT ·memhard2(SB), NOSPLIT, $16 // stack is used for the v2Sqrt CALL only
 	MOVQ    cc+0(FP), STATE
 	LEAQ    PAD_SIZE(STATE), AX  // *cc.finalState
 
