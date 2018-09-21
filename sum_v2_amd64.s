@@ -103,9 +103,6 @@ LOOP:
 	XORQ    $0x10, BX
 	LEAQ    0(STATE)(BX*1), BX
 	MOVO    0(BX), TMPX0       // chunk0
-	// <BEGIN> VARIANT2_2_1
-	PXOR    TMPX3, TMPX0
-	// <END> VARIANT2_2_1
 	MOVQ    TMP0, CX
 	XORQ    $0x20, CX
 	LEAQ    0(STATE)(CX*1), CX
@@ -115,6 +112,11 @@ LOOP:
 	LEAQ    0(STATE)(DX*1), DX
 	MOVO    0(DX), TMPX2       // chunk2
 
+	// <BEGIN> VARIANT2_2
+	PXOR    TMPX3, TMPX0
+	PXOR    TMPX1, TMPX3
+	// <END> VARIANT2_2
+
 	PADDQ   E, TMPX2
 	PADDQ   B, TMPX0
 	PADDQ   A, TMPX1
@@ -123,16 +125,13 @@ LOOP:
 	MOVO    TMPX0, 0(CX)
 	MOVO    TMPX1, 0(DX)
 	// <END> VARIANT2_SHUFFLE_ADD
-	// <BEGIN> VARIANT2_2_2
-	PXOR    TMPX0, TMPX3
-	// <END> VARIANT2_2_2
-	MOVO    B, E        // e = b
 
 	// byteAdd
 	PADDQ   TMPX3, A
 
 	MOVO    A, 0(CHUNK) // cc.scratchpad[addr:addr+2] = a
 	PXOR    D, A        // a ^= d
+	MOVO    B, E        // e = b
 	MOVO    C, B        // b = c
 
 	DECQ    I

@@ -68,20 +68,22 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 			offset1 := addr ^ 0x04
 			offset2 := addr ^ 0x06
 
-			tmpChunk0 := cc.scratchpad[offset0]
-			tmpChunk1 := cc.scratchpad[offset0+1]
+			chunk0_0 := cc.scratchpad[offset0+0]
+			chunk0_1 := cc.scratchpad[offset0+1]
+			chunk1_0 := cc.scratchpad[offset1+0]
+			chunk1_1 := cc.scratchpad[offset1+1]
+			chunk2_0 := cc.scratchpad[offset2+0]
+			chunk2_1 := cc.scratchpad[offset2+1]
 
-			cc.scratchpad[offset0] = cc.scratchpad[offset2] + e[0]
-			cc.scratchpad[offset0+1] = cc.scratchpad[offset2+1] + e[1]
-
-			cc.scratchpad[offset2] = cc.scratchpad[offset1] + a[0]
-			cc.scratchpad[offset2+1] = cc.scratchpad[offset1+1] + a[1]
-
-			cc.scratchpad[offset1] = tmpChunk0 + b[0]
-			cc.scratchpad[offset1+1] = tmpChunk1 + b[1]
+			cc.scratchpad[offset0+0] = chunk2_0 + e[0]
+			cc.scratchpad[offset0+1] = chunk2_1 + e[1]
+			cc.scratchpad[offset2+0] = chunk1_0 + a[0]
+			cc.scratchpad[offset2+1] = chunk1_1 + a[1]
+			cc.scratchpad[offset1+0] = chunk0_0 + b[0]
+			cc.scratchpad[offset1+1] = chunk0_1 + b[1]
 		}
 
-		cc.scratchpad[addr] = b[0] ^ c[0]
+		cc.scratchpad[addr+0] = b[0] ^ c[0]
 		cc.scratchpad[addr+1] = b[1] ^ c[1]
 
 		if variant == 1 {
@@ -116,25 +118,25 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 			offset1 := addr ^ 0x04
 			offset2 := addr ^ 0x06
 
-			// VARIANT2_2_1
-			cc.scratchpad[offset0] ^= hi
-			cc.scratchpad[offset0+1] ^= lo
+			chunk0_0 := cc.scratchpad[offset0+0]
+			chunk0_1 := cc.scratchpad[offset0+1]
+			chunk1_0 := cc.scratchpad[offset1+0]
+			chunk1_1 := cc.scratchpad[offset1+1]
+			chunk2_0 := cc.scratchpad[offset2+0]
+			chunk2_1 := cc.scratchpad[offset2+1]
 
-			tmpChunk0 := cc.scratchpad[offset0]
-			tmpChunk1 := cc.scratchpad[offset0+1]
+			// VARIANT2_2
+			chunk0_0 ^= hi
+			chunk0_1 ^= lo
+			hi ^= chunk1_0
+			lo ^= chunk1_1
 
-			cc.scratchpad[offset0] = cc.scratchpad[offset2] + e[0]
-			cc.scratchpad[offset0+1] = cc.scratchpad[offset2+1] + e[1]
-
-			cc.scratchpad[offset2] = cc.scratchpad[offset1] + a[0]
-			cc.scratchpad[offset2+1] = cc.scratchpad[offset1+1] + a[1]
-
-			cc.scratchpad[offset1] = tmpChunk0 + b[0]
-			cc.scratchpad[offset1+1] = tmpChunk1 + b[1]
-
-			// VARIANT2_2_2
-			hi ^= cc.scratchpad[offset1]
-			lo ^= cc.scratchpad[offset1+1]
+			cc.scratchpad[offset0+0] = chunk2_0 + e[0]
+			cc.scratchpad[offset0+1] = chunk2_1 + e[1]
+			cc.scratchpad[offset2+0] = chunk1_0 + a[0]
+			cc.scratchpad[offset2+1] = chunk1_1 + a[1]
+			cc.scratchpad[offset1+0] = chunk0_0 + b[0]
+			cc.scratchpad[offset1+1] = chunk0_1 + b[1]
 
 			// re-asign higher-order of b
 			e[0] = b[0]
@@ -145,7 +147,7 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 		a[0] += hi
 		a[1] += lo
 
-		cc.scratchpad[addr] = a[0]
+		cc.scratchpad[addr+0] = a[0]
 		cc.scratchpad[addr+1] = a[1]
 
 		if variant == 1 {
@@ -166,7 +168,7 @@ func (cc *cache) sumGo(data []byte, variant int) []byte {
 
 	for i := 0; i < 2*1024*1024/8; i += 16 {
 		for j := 0; j < 16; j += 2 {
-			cc.scratchpad[i+j] ^= tmp[j]
+			cc.scratchpad[i+j+0] ^= tmp[j+0]
 			cc.scratchpad[i+j+1] ^= tmp[j+1]
 			aes.CnRoundsGo(cc.scratchpad[i+j:i+j+2], cc.scratchpad[i+j:i+j+2], &cc.rkeys)
 		}

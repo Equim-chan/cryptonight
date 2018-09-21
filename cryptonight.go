@@ -4,32 +4,7 @@
 package cryptonight // import "ekyu.moe/cryptonight"
 
 import (
-	"hash"
 	"sync"
-	"unsafe"
-
-	"github.com/aead/skein"
-	"github.com/dchest/blake256"
-
-	"ekyu.moe/cryptonight/groestl"
-	"ekyu.moe/cryptonight/jh"
-)
-
-var (
-	// cachePool is a pool of cache.
-	cachePool = sync.Pool{
-		New: func() interface{} {
-			return new(cache)
-		},
-	}
-
-	// hashPool is for final hashes
-	hashPool = [...]*sync.Pool{
-		{New: func() interface{} { return blake256.New() }},
-		{New: func() interface{} { return groestl.New256() }},
-		{New: func() interface{} { return jh.New256() }},
-		{New: func() interface{} { return skein.New256(nil) }},
-	}
 )
 
 type cache struct {
@@ -48,16 +23,11 @@ type cache struct {
 	rkeys  [40]uint32 // 10 rounds, instead of 14 as in standard AES-256
 }
 
-func (cc *cache) finalHash() []byte {
-	// the final hash
-	hp := hashPool[cc.finalState[0]&0x03]
-	h := hp.Get().(hash.Hash)
-	h.Reset()
-	h.Write((*[200]byte)(unsafe.Pointer(&cc.finalState))[:])
-	sum := h.Sum(nil)
-	hp.Put(h)
-
-	return sum
+// cachePool is a pool of cache.
+var cachePool = sync.Pool{
+	New: func() interface{} {
+		return new(cache)
+	},
 }
 
 // Sum calculate a CryptoNight hash digest. The return value is exactly 32 bytes

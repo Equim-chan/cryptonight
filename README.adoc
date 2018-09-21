@@ -68,7 +68,7 @@ func main() {
 
     blob = []byte("Monero is cash for a connected world. It’s fast, private, and secure.")
     fmt.Printf("%x\n", cryptonight.Sum(blob, 2)) // variant 2
-    // Output: 8cda858c882f3f1d1e997d7ae892decd53c169912751f078eba0d9e96c3dc115
+    // Output: abb61f40468c70234051e4bb5e8b670812473b2a71e02c9633ef94996a621b96
 }
 ----
 

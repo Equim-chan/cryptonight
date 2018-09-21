@@ -60,7 +60,7 @@ func (cc *cache) sumAsm(data []byte, variant int) []byte {
 
 	for i := 0; i < 2*1024*1024/8; i += 16 {
 		for j := 0; j < 16; j += 2 {
-			cc.scratchpad[i+j] ^= tmp[j]
+			cc.scratchpad[i+j+0] ^= tmp[j+0]
 			cc.scratchpad[i+j+1] ^= tmp[j+1]
 			aes.CnRoundsAsm(&cc.scratchpad[i+j], &cc.scratchpad[i+j], &cc.rkeys)
 		}
