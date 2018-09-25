@@ -79,7 +79,7 @@ LOOP:
 	MOVL    AX, AX
 	LEAQ    0(AX)(DX*1), DIV_RESULT // divResult = (c[1]/divisor)&0xffffffff | (c[1]%divisor)<<32
 
-	MOVQ    X2, CX
+	MOVQ    C, CX
 	LEAQ    0(CX)(DIV_RESULT*1), AX // sqrtInput = c[0] + divResult
 	// <END> VARIANT2_INTEGER_MATH_DIVISION_STEP
 	MOVQ    AX, 0(SP)
