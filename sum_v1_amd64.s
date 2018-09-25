@@ -11,15 +11,14 @@ TEXT ·memhard1(SB), NOSPLIT, $0
 
 	MOVO    0(AX), A
 	PXOR    32(AX), A           // a = cc.finalState[0:2] ^ cc.finalState[4:6]
-
 	MOVO    16(AX), B
 	PXOR    48(AX), B           // b = cc.finalState[2:4] ^ cc.finalState[6:8]
-
 	// <BEGIN> VARIANT1_INIT
 	MOVQ    tweak+8(FP), TMPX0
 	PXOR    TWEAK, TWEAK
 	MOVLHPS TMPX0, TWEAK
 	// <END> VARIANT1_INIT
+
 	MOVQ    $ITER, I
 LOOP:
 	MOVQ    A, AX

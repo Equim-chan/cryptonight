@@ -10,10 +10,8 @@ TEXT ·memhard2(SB), NOSPLIT, $16 // stack is used for the v2Sqrt CALL only
 
 	MOVO    0(AX), A
 	PXOR    32(AX), A            // a = cc.finalState[0:2] ^ cc.finalState[4:6]
-
 	MOVO    16(AX), B
 	PXOR    48(AX), B            // b = cc.finalState[2:4] ^ cc.finalState[6:8]
-
 	// <BEGIN> VARIANT2_INIT
 	MOVO    64(AX), E
 	PXOR    80(AX), E            // e = cc.finalState[8:10] ^ cc.finalState[10:12]
@@ -33,22 +31,20 @@ LOOP:
 
 	// <BEGIN> VARIANT2_SHUFFLE_ADD
 	MOVQ    AX, BX
-	XORQ    $0x10, BX
-	LEAQ    0(STATE)(BX*1), BX
-	MOVO    0(BX), TMPX0       // chunk0
 	MOVQ    AX, CX
-	XORQ    $0x20, CX
-	LEAQ    0(STATE)(CX*1), CX
-	MOVO    0(CX), TMPX1       // chunk1
 	MOVQ    AX, DX
+	XORQ    $0x10, BX
+	XORQ    $0x20, CX
 	XORQ    $0x30, DX
+	LEAQ    0(STATE)(BX*1), BX
+	LEAQ    0(STATE)(CX*1), CX
 	LEAQ    0(STATE)(DX*1), DX
+	MOVO    0(BX), TMPX0       // chunk0
+	MOVO    0(CX), TMPX1       // chunk1
 	MOVO    0(DX), TMPX2       // chunk2
-
 	PADDQ   E, TMPX2
 	PADDQ   B, TMPX0
 	PADDQ   A, TMPX1
-
 	MOVO    TMPX2, 0(BX)
 	MOVO    TMPX0, 0(CX)
 	MOVO    TMPX1, 0(DX)
@@ -100,27 +96,24 @@ LOOP:
 
 	// <BEGIN> VARIANT2_SHUFFLE_ADD
 	MOVQ    TMP0, BX
-	XORQ    $0x10, BX
-	LEAQ    0(STATE)(BX*1), BX
-	MOVO    0(BX), TMPX0       // chunk0
 	MOVQ    TMP0, CX
-	XORQ    $0x20, CX
-	LEAQ    0(STATE)(CX*1), CX
-	MOVO    0(CX), TMPX1       // chunk1
 	MOVQ    TMP0, DX
+	XORQ    $0x10, BX
+	XORQ    $0x20, CX
 	XORQ    $0x30, DX
+	LEAQ    0(STATE)(BX*1), BX
+	LEAQ    0(STATE)(CX*1), CX
 	LEAQ    0(STATE)(DX*1), DX
+	MOVO    0(BX), TMPX0       // chunk0
+	MOVO    0(CX), TMPX1       // chunk1
 	MOVO    0(DX), TMPX2       // chunk2
-
 	// <BEGIN> VARIANT2_2
 	PXOR    TMPX3, TMPX0
 	PXOR    TMPX1, TMPX3
 	// <END> VARIANT2_2
-
 	PADDQ   E, TMPX2
 	PADDQ   B, TMPX0
 	PADDQ   A, TMPX1
-
 	MOVO    TMPX2, 0(BX)
 	MOVO    TMPX0, 0(CX)
 	MOVO    TMPX1, 0(DX)
