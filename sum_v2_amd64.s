@@ -67,8 +67,8 @@ LOOP:
 	MOVQ    CX, TMPX0
 	PXOR    TMPX0, D           // d[0] ^= divResult ^ (sqrtResult << 32)
 
-	MOVL    C, CX
-	LEAL    0(CX)(SQRT_RESULT*2), CX
+	MOVQ    C, BX
+	LEAL    0(BX)(SQRT_RESULT*2), CX
 	ORL     $0x80000001, CX    // divisor = (c[0]+(sqrtResult<<1))&0xffffffff | 0x80000001
 
 	MOVHLPS C, TMPX0
@@ -79,8 +79,7 @@ LOOP:
 	MOVL    AX, AX
 	LEAQ    0(AX)(DX*1), DIV_RESULT // divResult = (c[1]/divisor)&0xffffffff | (c[1]%divisor)<<32
 
-	MOVQ    C, CX
-	LEAQ    0(CX)(DIV_RESULT*1), AX // sqrtInput = c[0] + divResult
+	LEAQ    0(BX)(DIV_RESULT*1), AX // sqrtInput = c[0] + divResult
 	// <END> VARIANT2_INTEGER_MATH_DIVISION_STEP
 	MOVQ    AX, 0(SP)
 	CALL    ·v2Sqrt(SB)             // uses TMP1 and TMP2
