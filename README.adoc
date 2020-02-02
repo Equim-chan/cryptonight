@@ -11,7 +11,7 @@ image:https://img.shields.io/github/license/Equim-chan/cryptonight.svg[License, 
 Pure Go/ASM implementation of CryptoNight hash function and some of its variant, without any CGO binding.
 
 == Features
-* Support Monero v7 variant, and also the upcoming https://github.com/monero-project/monero/pull/4218/[variant 2]!
+* Support v0, v1, v2 variants.
 * No CGO hell, making builds easier and faster.
 * Hardware acceleration available for amd64 architecture.
 * Use of an internal sync.Pool to manage caches, since it is memory hard.
